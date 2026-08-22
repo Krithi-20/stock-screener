@@ -285,7 +285,6 @@
 
 </head>
 
-
 <body>
 
 <div class="container">
@@ -308,7 +307,6 @@
 
         </div>
 
-
         <div class="header-right">
 
             <!-- MARKET CAP FILTER -->
@@ -327,6 +325,14 @@
                         &gt; ₹5,000 Cr
                     </option>
 
+                    <option value="4000">
+                        &gt; ₹4,000 Cr
+                    </option>
+
+                    <option value="3000">
+                        &gt; ₹3,000 Cr
+                    </option>
+
                     <option value="2000">
                         &gt; ₹2,000 Cr
                     </option>
@@ -338,7 +344,6 @@
                 </select>
 
             </div>
-
 
             <!-- CONNECTION STATUS -->
 
@@ -353,7 +358,6 @@
         </div>
 
     </div>
-
 
     <!-- =====================================================
          TABS
@@ -370,7 +374,6 @@
 
         </button>
 
-
         <button
                 class="tab"
                 id="performersTab"
@@ -379,7 +382,6 @@
             Top Performers
 
         </button>
-
 
         <button
                 class="tab"
@@ -391,7 +393,6 @@
         </button>
 
     </div>
-
 
     <!-- =====================================================
          TABLE
@@ -441,7 +442,6 @@
 
             </thead>
 
-
             <tbody id="companyTable">
 
             <tr>
@@ -462,7 +462,6 @@
 
     </div>
 
-
     <!-- =====================================================
          FOOTER
          ===================================================== -->
@@ -480,7 +479,6 @@
     </div>
 
 </div>
-
 
 <script>
 
@@ -522,6 +520,8 @@
              *
              * /companies/live?minMarketCap=1000
              * /companies/live?minMarketCap=2000
+             * /companies/live?minMarketCap=3000
+             * /companies/live?minMarketCap=4000
              * /companies/live?minMarketCap=5000
              */
 
@@ -602,7 +602,7 @@
     function changeMarketCap() {
 
         /*
-         * Whenever Dad changes the market-cap threshold,
+         * Whenever the market-cap threshold changes,
          * return to the normal market-cap-sorted list.
          */
 
@@ -789,10 +789,12 @@
 
             `;
 
+
             document
                 .getElementById("total")
                 .textContent =
                 "Companies: 0";
+
 
             return;
         }

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.upstox.ApiClient;
@@ -44,32 +46,62 @@ public class UpstoxMarketDataService {
     }
 
     // =========================================================
+    // START WEBSOCKET AFTER APPLICATION IS READY
+    // =========================================================
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initialize() {
+
+        try {
+
+            start();
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Failed to start Upstox WebSocket."
+            );
+
+            e.printStackTrace();
+        }
+    }
+
+    // =========================================================
     // START WEBSOCKET
     // =========================================================
 
-    public synchronized void start() throws Exception {
+    public synchronized void start()
+            throws Exception {
 
+        /*
+         * Don't create another WebSocket if one
+         * is already connected.
+         */
         if (connected) {
             return;
         }
 
         /*
-         * Get today's FINAL filtered company list.
+         * Get the final filtered company list.
          *
          * This is dynamic.
          *
-         * It can be:
-         * 1362 companies today
-         * 1447 companies another day
-         * etc.
+         * The list comes from:
          *
-         * Nothing is hard-coded.
+         * NSE Security Master
+         * +
+         * BSE Group A/B
+         * +
+         * NSE closing prices
+         * +
+         * market-cap filter
          */
         List<String> isins =
                 companyFilterService
                         .getNseGroupABCompanies()
                         .stream()
-                        .map(company -> company.getIsin())
+                        .map(company ->
+                                company.getIsin())
                         .filter(isin ->
                                 isin != null &&
                                 !isin.isBlank())
@@ -83,7 +115,7 @@ public class UpstoxMarketDataService {
         }
 
         /*
-         * Convert ISIN into Upstox instrument key.
+         * Convert ISIN into Upstox instrument keys.
          *
          * Example:
          *
@@ -122,8 +154,10 @@ public class UpstoxMarketDataService {
                         "UPSTOX_ACCESS_TOKEN"
                 );
 
-        if (accessToken == null ||
-                accessToken.isBlank()) {
+        if (
+                accessToken == null ||
+                accessToken.isBlank()
+        ) {
 
             throw new IllegalStateException(
                     "UPSTOX_ACCESS_TOKEN environment variable not found."
@@ -155,7 +189,8 @@ public class UpstoxMarketDataService {
                         apiClient
                 );
 
-        streamer = newStreamer;
+        streamer =
+                newStreamer;
 
         // =====================================================
         // ON OPEN
@@ -170,10 +205,13 @@ public class UpstoxMarketDataService {
                         try {
 
                             /*
-                             * Subscribe to LTPC only.
+                             * Subscribe to LTPC.
                              *
-                             * We don't need market depth or
-                             * other unnecessary data.
+                             * LTPC gives us:
+                             *
+                             * LTP
+                             * Previous close
+                             * Last trade time
                              */
                             newStreamer.subscribe(
                                     instrumentKeys,
@@ -242,11 +280,6 @@ public class UpstoxMarketDataService {
         // CLOSE
         // =====================================================
 
-        /*
-         * SDK 1.27 requires:
-         *
-         * onClose(int code, String reason)
-         */
         newStreamer.setOnCloseListener(
                 (code, reason) -> {
 
@@ -254,6 +287,16 @@ public class UpstoxMarketDataService {
 
                     System.out.println(
                             "Upstox WebSocket closed."
+                    );
+
+                    System.out.println(
+                            "Code: "
+                                    + code
+                    );
+
+                    System.out.println(
+                            "Reason: "
+                                    + reason
                     );
                 }
         );
@@ -272,6 +315,10 @@ public class UpstoxMarketDataService {
         // CONNECT
         // =====================================================
 
+        System.out.println(
+                "Connecting to Upstox..."
+        );
+
         newStreamer.connect();
     }
 
@@ -284,21 +331,20 @@ public class UpstoxMarketDataService {
 
         try {
 
-            /*
-             * One WebSocket update can contain multiple
-             * instrument feeds.
-             */
             Map<String, MarketUpdateV3.Feed> feeds =
                     update.getFeeds();
 
-            if (feeds == null ||
-                    feeds.isEmpty()) {
-
+            if (
+                    feeds == null ||
+                    feeds.isEmpty()
+            ) {
                 return;
             }
 
-            for (Map.Entry<String, MarketUpdateV3.Feed> entry
-                    : feeds.entrySet()) {
+            for (
+                    Map.Entry<String, MarketUpdateV3.Feed> entry
+                            : feeds.entrySet()
+            ) {
 
                 String instrumentKey =
                         entry.getKey();
@@ -311,8 +357,7 @@ public class UpstoxMarketDataService {
                 }
 
                 /*
-                 * We subscribed using LTPC mode, so the
-                 * LTPC object should be available.
+                 * LTPC object.
                  */
                 MarketUpdateV3.LTPC ltpc =
                         feed.getLtpc();
@@ -333,15 +378,14 @@ public class UpstoxMarketDataService {
                 /*
                  * Ignore invalid prices.
                  */
-                if (lastPrice <= 0 ||
-                        previousClose <= 0) {
-
+                if (
+                        lastPrice <= 0 ||
+                        previousClose <= 0
+                ) {
                     continue;
                 }
 
                 /*
-                 * Absolute change:
-                 *
                  * Current price - previous close
                  */
                 double change =
@@ -349,10 +393,7 @@ public class UpstoxMarketDataService {
                         previousClose;
 
                 /*
-                 * Percentage change:
-                 *
-                 * ((Current - Previous Close)
-                 *      / Previous Close) * 100
+                 * Percentage change.
                  */
                 double changePercent =
                         (change /
@@ -364,7 +405,7 @@ public class UpstoxMarketDataService {
                  *
                  * NSE_EQ|INE002A01018
                  *
-                 * into:
+                 * to:
                  *
                  * INE002A01018
                  */
@@ -387,10 +428,7 @@ public class UpstoxMarketDataService {
                         );
 
                 /*
-                 * Store/update immediately.
-                 *
-                 * ConcurrentHashMap makes this safe while
-                 * the controller reads the same map.
+                 * Store the latest quote.
                  */
                 liveQuotes.put(
                         isin,
@@ -401,8 +439,8 @@ public class UpstoxMarketDataService {
         } catch (Exception e) {
 
             /*
-             * Never allow one malformed market update to
-             * kill the WebSocket.
+             * Never allow one malformed update
+             * to kill the WebSocket.
              */
             System.err.println(
                     "Error processing Upstox market update: "
@@ -418,18 +456,21 @@ public class UpstoxMarketDataService {
     private String extractIsin(
             String instrumentKey) {
 
-        if (instrumentKey == null ||
-                instrumentKey.isBlank()) {
-
+        if (
+                instrumentKey == null ||
+                instrumentKey.isBlank()
+        ) {
             return null;
         }
 
         int separator =
                 instrumentKey.indexOf('|');
 
-        if (separator < 0 ||
-                separator == instrumentKey.length() - 1) {
-
+        if (
+                separator < 0 ||
+                separator ==
+                        instrumentKey.length() - 1
+        ) {
             return null;
         }
 
@@ -445,8 +486,7 @@ public class UpstoxMarketDataService {
     public Map<String, LiveQuote> getLiveQuotes() {
 
         /*
-         * Return a snapshot rather than exposing the
-         * ConcurrentHashMap itself.
+         * Return a snapshot.
          */
         return new HashMap<>(
                 liveQuotes

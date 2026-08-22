@@ -15,55 +15,102 @@ import org.springframework.stereotype.Service;
 @Service
 public class NseReaderService {
 
-    private static final String NSE_FILE =
-            "data/nse/NSE_CM_security_11082026.csv";
+    private static final Path NSE_FILE =
+            Path.of(
+                    "data",
+                    "nse",
+                    "security-master.csv"
+            );
 
-    public Map<String, NseData> readNseCompanies() throws Exception {
+    public Map<String, NseData> readNseCompanies()
+            throws Exception {
 
-        Map<String, NseData> nseCompanies = new HashMap<>();
+        Map<String, NseData> nseCompanies =
+                new HashMap<>();
 
-        try (Reader reader = Files.newBufferedReader(
-                Path.of(NSE_FILE),
-                StandardCharsets.UTF_8
-        )) {
+        if (!Files.exists(NSE_FILE)) {
 
-            CSVFormat format = CSVFormat.DEFAULT.builder()
-                    .setHeader()
-                    .setSkipHeaderRecord(true)
-                    .build();
+            throw new IllegalStateException(
+                    "NSE Security Master not found: "
+                            + NSE_FILE.toAbsolutePath()
+            );
+        }
 
-            try (CSVParser parser = new CSVParser(reader, format)) {
+        try (
+                Reader reader =
+                        Files.newBufferedReader(
+                                NSE_FILE,
+                                StandardCharsets.UTF_8
+                        )
+        ) {
+
+            CSVFormat format =
+                    CSVFormat.DEFAULT.builder()
+                            .setHeader()
+                            .setSkipHeaderRecord(true)
+                            .build();
+
+            try (
+                    CSVParser parser =
+                            new CSVParser(
+                                    reader,
+                                    format
+                            )
+            ) {
 
                 for (CSVRecord record : parser) {
 
-                    String isin = record.get("ISIN");
-                    String symbol = record.get("TckrSymb");
-                    String name = record.get("FinInstrmNm");
-                    String series = record.get("SctySrs");
+                    String isin =
+                            record.get("ISIN");
 
-                    if (isin == null || isin.isBlank()) {
+                    String symbol =
+                            record.get("TckrSymb");
+
+                    String name =
+                            record.get("FinInstrmNm");
+
+                    String series =
+                            record.get("SctySrs");
+
+                    if (
+                            isin == null
+                                    ||
+                            isin.isBlank()
+                    ) {
                         continue;
                     }
 
-                    // Only normal NSE equity securities
-                    if (!"EQ".equalsIgnoreCase(series)) {
+                    /*
+                     * Only normal NSE equity securities.
+                     */
+                    if (
+                            !"EQ".equalsIgnoreCase(
+                                    series
+                            )
+                    ) {
                         continue;
                     }
 
-                    double issuedCapital = parseNumber(
-                            record.get("IssdCptl")
-                    );
+                    double issuedCapital =
+                            parseNumber(
+                                    record.get("IssdCptl")
+                            );
 
-                    double faceValue = parseNumber(
-                            record.get("ParVal")
-                    );
+                    double faceValue =
+                            parseNumber(
+                                    record.get("ParVal")
+                            );
 
                     nseCompanies.put(
-                            isin,
+                            isin.trim(),
                             new NseData(
-                                    isin,
-                                    symbol,
-                                    name,
+                                    isin.trim(),
+                                    symbol == null
+                                            ? ""
+                                            : symbol.trim(),
+                                    name == null
+                                            ? ""
+                                            : name.trim(),
                                     issuedCapital,
                                     faceValue
                             )
@@ -72,25 +119,34 @@ public class NseReaderService {
             }
         }
 
-    
-
-
         System.out.println(
-                "NSE companies loaded: " + nseCompanies.size()
+                "NSE companies loaded: "
+                        + nseCompanies.size()
         );
 
         return nseCompanies;
     }
 
-    private double parseNumber(String value) {
+    private double parseNumber(
+            String value
+    ) {
 
-        if (value == null || value.isBlank()) {
+        if (
+                value == null
+                        ||
+                value.isBlank()
+        ) {
             return 0.0;
         }
 
         try {
-            return Double.parseDouble(value);
+
+            return Double.parseDouble(
+                    value.trim()
+            );
+
         } catch (NumberFormatException e) {
+
             return 0.0;
         }
     }
@@ -108,13 +164,16 @@ public class NseReaderService {
                 String symbol,
                 String name,
                 double issuedCapital,
-                double faceValue) {
+                double faceValue
+        ) {
 
             this.isin = isin;
             this.symbol = symbol;
             this.name = name;
-            this.issuedCapital = issuedCapital;
-            this.faceValue = faceValue;
+            this.issuedCapital =
+                    issuedCapital;
+            this.faceValue =
+                    faceValue;
         }
 
         public String getIsin() {

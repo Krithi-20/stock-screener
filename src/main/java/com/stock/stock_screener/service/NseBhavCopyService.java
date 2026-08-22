@@ -15,62 +15,117 @@ import org.springframework.stereotype.Service;
 @Service
 public class NseBhavCopyService {
 
-    private static final String BHAVCOPY_FILE =
-            "data/nse/BhavCopy_NSE_CM_0_0_0_20260811_F_0000.csv/BhavCopy_NSE_CM_0_0_0_20260811_F_0000.csv";
+    private static final Path BHAVCOPY_FILE =
+            Path.of(
+                    "data",
+                    "nse",
+                    "bhavcopy.csv"
+            );
 
-    public Map<String, Double> readClosingPrices() throws Exception {
+    public Map<String, Double> readClosingPrices()
+            throws Exception {
 
-        Map<String, Double> closingPrices = new HashMap<>();
+        Map<String, Double> closingPrices =
+                new HashMap<>();
 
-        try (Reader reader = Files.newBufferedReader(
-                Path.of(BHAVCOPY_FILE),
-                StandardCharsets.UTF_8
-        )) {
+        if (!Files.exists(BHAVCOPY_FILE)) {
 
-            CSVFormat format = CSVFormat.DEFAULT.builder()
-                    .setHeader()
-                    .setSkipHeaderRecord(true)
-                    .build();
+            throw new IllegalStateException(
+                    "NSE Bhavcopy not found: "
+                            + BHAVCOPY_FILE.toAbsolutePath()
+            );
+        }
 
-            try (CSVParser parser = new CSVParser(reader, format)) {
+        try (
+                Reader reader =
+                        Files.newBufferedReader(
+                                BHAVCOPY_FILE,
+                                StandardCharsets.UTF_8
+                        )
+        ) {
+
+            CSVFormat format =
+                    CSVFormat.DEFAULT.builder()
+                            .setHeader()
+                            .setSkipHeaderRecord(true)
+                            .build();
+
+            try (
+                    CSVParser parser =
+                            new CSVParser(
+                                    reader,
+                                    format
+                            )
+            ) {
 
                 for (CSVRecord record : parser) {
 
-                    String isin = record.get("ISIN");
-                    String series = record.get("SctySrs");
-                    String instrumentType = record.get("FinInstrmTp");
+                    String isin =
+                            record.get("ISIN");
 
-                    if (isin == null || isin.isBlank()) {
+                    String series =
+                            record.get("SctySrs");
+
+                    String instrumentType =
+                            record.get("FinInstrmTp");
+
+                    if (
+                            isin == null
+                                    ||
+                            isin.isBlank()
+                    ) {
                         continue;
                     }
 
-                    // Only normal equity shares
-                    if (!"EQ".equalsIgnoreCase(series)) {
+                    /*
+                     * Only normal NSE equity shares.
+                     */
+                    if (
+                            !"EQ".equalsIgnoreCase(
+                                    series
+                            )
+                    ) {
                         continue;
                     }
 
-                    if (!"STK".equalsIgnoreCase(instrumentType)) {
+                    if (
+                            !"STK".equalsIgnoreCase(
+                                    instrumentType
+                            )
+                    ) {
                         continue;
                     }
 
-                    String closingPriceText = record.get("ClsPric");
+                    String closingPriceText =
+                            record.get("ClsPric");
 
-                    if (closingPriceText == null
-                            || closingPriceText.isBlank()) {
+                    if (
+                            closingPriceText == null
+                                    ||
+                            closingPriceText.isBlank()
+                    ) {
                         continue;
                     }
 
                     try {
+
                         double closingPrice =
-                                Double.parseDouble(closingPriceText);
+                                Double.parseDouble(
+                                        closingPriceText.trim()
+                                );
 
                         if (closingPrice <= 0) {
                             continue;
                         }
 
-                        closingPrices.put(isin, closingPrice);
+                        closingPrices.put(
+                                isin.trim(),
+                                closingPrice
+                        );
 
-                    } catch (NumberFormatException ignored) {
+                    } catch (
+                            NumberFormatException ignored
+                    ) {
                         // Ignore invalid price values
                     }
                 }
