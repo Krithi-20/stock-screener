@@ -2,292 +2,34 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Stock Screener</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <style>
+    <title>Strykr</title>
 
-        * {
-            box-sizing: border-box;
-        }
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
 
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f6f8;
-            color: #1f2937;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 1600px;
-            margin: 30px auto;
-        }
-
-        /* =====================================================
-           HEADER
-           ===================================================== */
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .title-section h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .title-section p {
-            margin: 6px 0 0;
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 22px;
-        }
-
-        .status {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        /* =====================================================
-           MARKET CAP FILTER
-           ===================================================== */
-
-        .market-cap-filter {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .market-cap-filter label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .market-cap-filter select {
-            padding: 9px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 7px;
-            background: white;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            cursor: pointer;
-        }
-
-        .market-cap-filter select:focus {
-            outline: none;
-            border-color: #111827;
-        }
-
-        /* =====================================================
-           TABS
-           ===================================================== */
-
-        .tabs {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            border: none;
-            padding: 10px 18px;
-            border-radius: 7px;
-            cursor: pointer;
-            background: #e5e7eb;
-            color: #374151;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .tab:hover {
-            background: #d1d5db;
-        }
-
-        .tab.active {
-            background: #111827;
-            color: white;
-        }
-
-        /* =====================================================
-           TABLE
-           ===================================================== */
-
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #111827;
-            color: white;
-        }
-
-        th {
-            padding: 13px 14px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 12px 14px;
-            border-bottom: 1px solid #eef0f2;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .rank {
-            width: 60px;
-            color: #6b7280;
-        }
-
-        .symbol {
-            font-weight: 700;
-        }
-
-        .company-name {
-            max-width: 350px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .group {
-            font-weight: 600;
-        }
-
-        .market-cap {
-            font-weight: 600;
-        }
-
-        .live-price {
-            font-weight: 700;
-        }
-
-        .positive {
-            color: #16803c;
-            font-weight: 700;
-        }
-
-        .negative {
-            color: #d32f2f;
-            font-weight: 700;
-        }
-
-        .neutral {
-            color: #6b7280;
-        }
-
-        /* =====================================================
-           FOOTER
-           ===================================================== */
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        /* =====================================================
-           LOADING / ERROR
-           ===================================================== */
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-        }
-
-        .error {
-            text-align: center;
-            padding: 30px;
-            color: #d32f2f;
-        }
-
-        /* =====================================================
-           RESPONSIVE
-           ===================================================== */
-
-        @media (max-width: 1000px) {
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .tabs {
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 1100px;
-            }
-        }
-
-        @media (max-width: 600px) {
-
-            .container {
-                width: 98%;
-                margin: 15px auto;
-            }
-
-            .header-right {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .title-section h1 {
-                font-size: 24px;
-            }
-        }
-
-    </style>
+    <link
+        rel="icon"
+        type="image/png"
+        href="/images/strike.png"
+    >
 
 </head>
+
 
 <body>
 
 <div class="container">
+
 
     <!-- =====================================================
          HEADER
@@ -295,21 +37,43 @@
 
     <div class="header">
 
+
+        <!-- =================================================
+             TITLE
+             ================================================= -->
+
         <div class="title-section">
 
             <h1>
-                NSE Stock Screener
+                Strykr
             </h1>
 
             <p>
-                NSE-listed companies • BSE Group A/B where applicable
+
+                NSE/BSE Listed Stock Screener
+
+                <span
+                    class="status"
+                    id="status">
+                </span>
+
             </p>
 
         </div>
 
+
+        <!-- =================================================
+             RIGHT SIDE
+             ================================================= -->
+
         <div class="header-right">
 
-            <!-- MARKET CAP FILTER -->
+
+
+
+            <!-- =============================================
+                 MARKET CAP
+                 ============================================= -->
 
             <div class="market-cap-filter">
 
@@ -317,47 +81,36 @@
                     Market Cap
                 </label>
 
-                <select
-                        id="marketCapSelect"
-                        onchange="changeMarketCap()">
+                <select id="marketCapSelect">
 
-                    <option value="5000">
-                        &gt; ₹5,000 Cr
-                    </option>
-
-                    <option value="4000">
-                        &gt; ₹4,000 Cr
-                    </option>
-
-                    <option value="3000">
-                        &gt; ₹3,000 Cr
+                    <option value="1000">
+                        ₹1,000 Cr+
                     </option>
 
                     <option value="2000">
-                        &gt; ₹2,000 Cr
+                        ₹2,000 Cr+
                     </option>
 
-                    <option value="1000" selected>
-                        &gt; ₹1,000 Cr
+                    <option value="3000">
+                        ₹3,000 Cr+
+                    </option>
+
+                    <option value="4000">
+                        ₹4,000 Cr+
+                    </option>
+
+                    <option value="5000">
+                        ₹5,000 Cr+
                     </option>
 
                 </select>
 
             </div>
 
-            <!-- CONNECTION STATUS -->
-
-            <div
-                    class="status"
-                    id="status">
-
-                Loading...
-
-            </div>
-
         </div>
 
     </div>
+
 
     <!-- =====================================================
          TABS
@@ -366,33 +119,36 @@
     <div class="tabs">
 
         <button
-                class="tab active"
-                id="allTab"
-                onclick="showAll()">
+            class="tab active"
+            id="allTab"
+            onclick="showAll()">
 
             All Companies
 
         </button>
 
+
         <button
-                class="tab"
-                id="performersTab"
-                onclick="showPerformers()">
+            class="tab"
+            id="performersTab"
+            onclick="showPerformers()">
 
             Top Performers
 
         </button>
 
+
         <button
-                class="tab"
-                id="losersTab"
-                onclick="showLosers()">
+            class="tab"
+            id="losersTab"
+            onclick="showLosers()">
 
             Top Losers
 
         </button>
 
     </div>
+
 
     <!-- =====================================================
          TABLE
@@ -419,7 +175,7 @@
                 </th>
 
                 <th>
-                    Group
+                    Change %
                 </th>
 
                 <th>
@@ -435,20 +191,21 @@
                 </th>
 
                 <th>
-                    Change %
+                    Group
                 </th>
 
             </tr>
 
             </thead>
 
+
             <tbody id="companyTable">
 
             <tr>
 
                 <td
-                        colspan="8"
-                        class="loading">
+                    colspan="8"
+                    class="loading">
 
                     Loading companies...
 
@@ -461,6 +218,7 @@
         </table>
 
     </div>
+
 
     <!-- =====================================================
          FOOTER
@@ -480,614 +238,12 @@
 
 </div>
 
-<script>
 
-    // =========================================================
-    // GLOBAL STATE
-    // =========================================================
-
-    let companies = [];
-
-    let currentView = "all";
-
-
-    // =========================================================
-    // MARKET CAP
-    // =========================================================
-
-    function getSelectedMarketCap() {
-
-        return document
-            .getElementById("marketCapSelect")
-            .value;
-    }
-
-
-    // =========================================================
-    // LOAD LIVE DATA
-    // =========================================================
-
-    async function loadCompanies() {
-
-        try {
-
-            const marketCap =
-                getSelectedMarketCap();
-
-
-            /*
-             * Backend filtering:
-             *
-             * /companies/live?minMarketCap=1000
-             * /companies/live?minMarketCap=2000
-             * /companies/live?minMarketCap=3000
-             * /companies/live?minMarketCap=4000
-             * /companies/live?minMarketCap=5000
-             */
-
-            const response =
-                await fetch(
-                    "/companies/live?minMarketCap="
-                    + marketCap
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "HTTP " +
-                    response.status
-                );
-            }
-
-
-            companies =
-                await response.json();
-
-
-            render();
-
-
-            document
-                .getElementById("status")
-                .textContent =
-                "Live data connected";
-
-
-            document
-                .getElementById("lastUpdated")
-                .textContent =
-                "Last update: " +
-                new Date()
-                    .toLocaleTimeString();
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-
-            document
-                .getElementById("status")
-                .textContent =
-                "Connection error";
-
-
-            document
-                .getElementById("companyTable")
-                .innerHTML = `
-
-                    <tr>
-
-                        <td
-                                colspan="8"
-                                class="error">
-
-                            Unable to load live company data.
-
-                        </td>
-
-                    </tr>
-
-                `;
-        }
-    }
-
-
-    // =========================================================
-    // MARKET CAP CHANGED
-    // =========================================================
-
-    function changeMarketCap() {
-
-        /*
-         * Whenever the market-cap threshold changes,
-         * return to the normal market-cap-sorted list.
-         */
-
-        currentView = "all";
-
-        setActiveTab("allTab");
-
-        loadCompanies();
-    }
-
-
-    // =========================================================
-    // ALL COMPANIES
-    // =========================================================
-
-    function showAll() {
-
-        currentView = "all";
-
-        setActiveTab("allTab");
-
-        render();
-    }
-
-
-    // =========================================================
-    // TOP PERFORMERS
-    // =========================================================
-
-    function showPerformers() {
-
-        currentView = "performers";
-
-        setActiveTab("performersTab");
-
-        render();
-    }
-
-
-    // =========================================================
-    // TOP LOSERS
-    // =========================================================
-
-    function showLosers() {
-
-        currentView = "losers";
-
-        setActiveTab("losersTab");
-
-        render();
-    }
-
-
-    // =========================================================
-    // TAB STYLE
-    // =========================================================
-
-    function setActiveTab(id) {
-
-        document
-            .querySelectorAll(".tab")
-            .forEach(tab => {
-
-                tab.classList.remove(
-                    "active"
-                );
-
-            });
-
-
-        document
-            .getElementById(id)
-            .classList.add(
-                "active"
-            );
-    }
-
-
-    // =========================================================
-    // GET DISPLAYED COMPANIES
-    // =========================================================
-
-    function getDisplayedCompanies() {
-
-        let data =
-            [...companies];
-
-
-        /*
-         * ALL COMPANIES
-         *
-         * Backend already returns these in:
-         *
-         * largest market cap → smallest market cap
-         */
-
-        if (currentView === "all") {
-
-            return data;
-        }
-
-
-        /*
-         * TOP PERFORMERS
-         *
-         * Highest positive change percentage first.
-         */
-
-        if (currentView === "performers") {
-
-            return data
-
-                .filter(company =>
-                    company.changePercent !== null &&
-                    company.changePercent !== undefined
-                )
-
-                .sort(
-                    (a, b) =>
-                        b.changePercent -
-                        a.changePercent
-                );
-        }
-
-
-        /*
-         * TOP LOSERS
-         *
-         * Lowest change percentage first.
-         */
-
-        if (currentView === "losers") {
-
-            return data
-
-                .filter(company =>
-                    company.changePercent !== null &&
-                    company.changePercent !== undefined
-                )
-
-                .sort(
-                    (a, b) =>
-                        a.changePercent -
-                        b.changePercent
-                );
-        }
-
-
-        return data;
-    }
-
-
-    // =========================================================
-    // RENDER TABLE
-    // =========================================================
-
-    function render() {
-
-        const table =
-            document.getElementById(
-                "companyTable"
-            );
-
-
-        const data =
-            getDisplayedCompanies();
-
-
-        if (data.length === 0) {
-
-            table.innerHTML = `
-
-                <tr>
-
-                    <td
-                            colspan="8"
-                            class="loading">
-
-                        No live data available yet.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-
-            document
-                .getElementById("total")
-                .textContent =
-                "Companies: 0";
-
-
-            return;
-        }
-
-
-        table.innerHTML = "";
-
-
-        data.forEach(
-            (company, index) => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                // =================================================
-                // CHANGE CLASS
-                // =================================================
-
-                let changeClass =
-                    "neutral";
-
-
-                if (
-                    company.changePercent !== null &&
-                    company.changePercent !== undefined &&
-                    company.changePercent > 0
-                ) {
-
-                    changeClass =
-                        "positive";
-
-                }
-
-                else if (
-                    company.changePercent !== null &&
-                    company.changePercent !== undefined &&
-                    company.changePercent < 0
-                ) {
-
-                    changeClass =
-                        "negative";
-                }
-
-
-                // =================================================
-                // LIVE PRICE
-                // =================================================
-
-                const livePrice =
-                    company.livePrice !== null &&
-                    company.livePrice !== undefined
-
-                        ? "₹" +
-                          Number(
-                              company.livePrice
-                          ).toLocaleString(
-                              "en-IN",
-                              {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                              }
-                          )
-
-                        : "—";
-
-
-                // =================================================
-                // CHANGE
-                // =================================================
-
-                const change =
-                    company.change !== null &&
-                    company.change !== undefined
-
-                        ? formatChange(
-                              company.change
-                          )
-
-                        : "—";
-
-
-                // =================================================
-                // CHANGE %
-                // =================================================
-
-                const changePercent =
-                    company.changePercent !== null &&
-                    company.changePercent !== undefined
-
-                        ? formatPercent(
-                              company.changePercent
-                          )
-
-                        : "—";
-
-
-                // =================================================
-                // MARKET CAP
-                // =================================================
-
-                const marketCap =
-                    Number(
-                        company.marketCap
-                    ).toLocaleString(
-                        "en-IN",
-                        {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        }
-                    );
-
-
-                // =================================================
-                // ROW
-                // =================================================
-
-                row.innerHTML = `
-
-                    <td class="rank">
-                        ${index + 1}
-                    </td>
-
-                    <td class="symbol">
-                        ${escapeHtml(
-                            company.nseSymbol
-                        )}
-                    </td>
-
-                    <td class="company-name">
-                        ${escapeHtml(
-                            company.companyName
-                        )}
-                    </td>
-
-                    <td class="group">
-                        ${escapeHtml(
-                            company.bseGroup
-                        )}
-                    </td>
-
-                    <td class="market-cap">
-                        ₹${marketCap} Cr
-                    </td>
-
-                    <td class="live-price">
-                        ${livePrice}
-                    </td>
-
-                    <td class="${changeClass}">
-                        ${change}
-                    </td>
-
-                    <td class="${changeClass}">
-                        ${changePercent}
-                    </td>
-
-                `;
-
-
-                table.appendChild(
-                    row
-                );
-
-            }
-        );
-
-
-        document
-            .getElementById("total")
-            .textContent =
-            "Companies: " +
-            data.length;
-    }
-
-
-    // =========================================================
-    // FORMAT CHANGE
-    // =========================================================
-
-    function formatChange(value) {
-
-        const number =
-            Number(value);
-
-
-        if (number > 0) {
-
-            return "+" +
-                number.toFixed(2);
-        }
-
-
-        return number.toFixed(2);
-    }
-
-
-    // =========================================================
-    // FORMAT PERCENT
-    // =========================================================
-
-    function formatPercent(value) {
-
-        const number =
-            Number(value);
-
-
-        if (number > 0) {
-
-            return "+" +
-                number.toFixed(2) +
-                "%";
-        }
-
-
-        return number.toFixed(2) +
-            "%";
-    }
-
-
-    // =========================================================
-    // ESCAPE HTML
-    // =========================================================
-
-    function escapeHtml(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return "";
-        }
-
-
-        return String(value)
-
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-
-            .replace(
-                /</g,
-                "&lt;"
-            )
-
-            .replace(
-                />/g,
-                "&gt;"
-            )
-
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-    }
-
-
-    // =========================================================
-    // INITIAL LOAD
-    // =========================================================
-
-    loadCompanies();
-
-
-    // =========================================================
-    // UI REFRESH
-    // =========================================================
-
-    /*
-     * The backend receives the market data through the
-     * Upstox WebSocket.
-     *
-     * This one-second request only reads the backend's
-     * current cached values and refreshes the browser.
-     *
-     * It does NOT create a new Upstox connection.
-     */
-
-    setInterval(
-        loadCompanies,
-        1000
-    );
-
+<script
+    type="module"
+    src="/js/app.js">
 </script>
+
 
 </body>
 

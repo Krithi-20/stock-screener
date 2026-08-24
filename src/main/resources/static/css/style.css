@@ -1,0 +1,645 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f6f8;
+    color: #1f2937;
+}
+
+
+.container {
+    width: 95%;
+    max-width: 1600px;
+    margin: 30px auto;
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+.title-section h1 {
+    margin: 0;
+    font-size: 30px;
+    font-family: "Bebas Neue", sans-serif;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    background: linear-gradient(
+        90deg,
+        #FFDC00,
+        #F1333F,
+        #AE283F
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+
+.title-section p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: grey;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+
+/* =====================================================
+   HEADER RIGHT
+   ===================================================== */
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+
+/* =====================================================
+   MARKET OVERVIEW
+   ===================================================== */
+
+.market-overview {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 22px;
+}
+
+
+.market-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+
+.market-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+}
+
+
+.market-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+
+.market-change,
+.market-change-percent {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+
+/* =====================================================
+   MARKET COLORS
+   ===================================================== */
+
+.market-change.market-positive,
+.market-change-percent.market-positive {
+    color: #16803c;
+}
+
+
+.market-change.market-negative,
+.market-change-percent.market-negative {
+    color: #d32f2f;
+}
+
+
+.market-change.market-neutral,
+.market-change-percent.market-neutral {
+    color: #9ca3af;
+}
+
+
+/* =====================================================
+   MARKET GRAPH
+   ===================================================== */
+
+.market-graph {
+    width: 55px;
+    height: 20px;
+    display: block;
+    overflow: visible;
+}
+
+
+.market-graph polyline {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.market-graph.market-positive polyline {
+    stroke: #16803c;
+}
+
+
+.market-graph.market-negative polyline {
+    stroke: #d32f2f;
+}
+
+
+.market-graph.market-neutral polyline {
+    stroke: #9ca3af;
+}
+
+
+    
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.status {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid #9ca3af;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+}
+
+
+.status::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+}
+
+
+.status.live {
+    border-color: #22c55e;
+
+    box-shadow:
+        0 0 6px rgba(34, 197, 94, 0.7),
+        0 0 12px rgba(34, 197, 94, 0.35);
+}
+
+
+.status.live::after {
+    background: #22c55e;
+}
+
+
+/* =====================================================
+   MARKET CAP FILTER
+   ===================================================== */
+
+.market-cap-filter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+
+.market-cap-filter label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+
+.market-cap-filter select {
+    padding: 7px 11px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s,
+        background 0.2s;
+}
+
+
+.market-cap-filter select:hover {
+    border-color: #9ca3af;
+    background: #fafafa;
+}
+
+
+.market-cap-filter select:focus {
+    outline: none;
+
+    border-color: #8b5cf6;
+
+    box-shadow:
+        0 0 0 2px rgba(
+            139,
+            92,
+            246,
+            0.12
+        );
+}
+
+
+/* =====================================================
+   TABS
+   ===================================================== */
+
+.tabs {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+
+.tab {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+
+    background: #e5e7eb;
+    color: #374151;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+
+.tab:hover {
+    background: #d1d5db;
+}
+
+
+.tab.active {
+    background: #111827;
+    color: white;
+}
+
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+
+.table-container {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 10px rgba(
+            0,
+            0,
+            0,
+            0.06
+        );
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+thead {
+    background: #111827;
+    color: white;
+}
+
+
+th {
+    padding: 13px 14px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
+td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eef0f2;
+
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+
+td,
+th {
+    user-select: text;
+}
+
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+
+.rank {
+    width: 60px;
+    color: #6b7280;
+}
+
+
+.symbol {
+    font-weight: 700;
+}
+
+
+.company-name {
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.group {
+    font-weight: 400;
+}
+
+
+.market-cap {
+    font-weight: 400;
+}
+
+
+.live-price {
+    font-weight: 400;
+}
+
+
+.positive {
+    color: #16803c;
+    font-weight: 700;
+}
+
+
+.negative {
+    color: #d32f2f;
+    font-weight: 700;
+}
+
+
+.neutral {
+    color: #6b7280;
+}
+
+
+.change-value {
+    font-weight: 400;
+}
+
+
+/* =====================================================
+   NSE SYMBOL CHECKBOX
+   ===================================================== */
+
+.symbol-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.symbol-checkbox {
+    width: 15px;
+    height: 15px;
+
+    margin: 0;
+    cursor: pointer;
+
+    accent-color: #111827;
+
+    flex-shrink: 0;
+}
+
+
+.symbol-text {
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   SYMBOL ACTIONS
+   ===================================================== */
+
+.symbol-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+}
+
+
+.symbol-action {
+    border: none;
+    border-radius: 5px;
+
+    padding: 3px 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.copy-action {
+    background: #111827;
+    color: white;
+}
+
+
+.visit-action {
+    background: #16803c;
+    color: white;
+}
+
+
+.unvisit-action {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+
+.symbol-action:hover {
+    opacity: 0.85;
+}
+
+
+/* =====================================================
+   VISITED ROW
+   ===================================================== */
+
+.visited-row {
+    background: #f3f4f6 !important;
+}
+
+
+.visited-row td {
+    color: #9ca3af;
+}
+
+
+.visited-row td.positive {
+    color: #7aaa87;
+}
+
+
+.visited-row td.negative {
+    color: #d98b8b;
+}
+
+
+.visited-row .symbol-text {
+    color: #6b7280;
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 12px;
+
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   LOADING / ERROR
+   ===================================================== */
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}
+
+
+.error {
+    text-align: center;
+    padding: 30px;
+    color: #d32f2f;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 1000px) {
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+
+    .header-right {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+
+    .market-overview {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    .market-cap-filter {
+        justify-content: flex-start;
+    }
+
+
+    .tabs {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+
+    table {
+        min-width: 1100px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .container {
+        width: 98%;
+        margin: 15px auto;
+    }
+
+
+    .header-right {
+        align-items: flex-start;
+    }
+
+
+    .market-overview {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+
+    .title-section h1 {
+        font-size: 24px;
+    }
+
+}
