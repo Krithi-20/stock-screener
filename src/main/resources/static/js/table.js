@@ -17,7 +17,9 @@ let selectedSymbols = new Set();
 
 let visitedSymbols = new Set();
 
-let rangeStartIndex = null;
+let copiedSymbols = new Set();
+
+let lastClickedIndex = null;
 
 let currentCompanies = [];
 
@@ -43,9 +45,7 @@ async function copySymbols(symbols) {
             text
         );
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Copy failed:",
@@ -75,9 +75,7 @@ function getSelectionState() {
 
                 visitedCount++;
 
-            }
-
-            else {
+            } else {
 
                 unvisitedCount++;
 
@@ -109,14 +107,14 @@ async function copySelected() {
     }
 
 
-    // Copy only NSE symbols
+    // Copy selected NSE symbols
 
     await copySymbols(
         symbols
     );
 
 
-    // Mark everything selected as visited
+    // Mark copied symbols as visited
 
     symbols.forEach(
         symbol => {
@@ -125,34 +123,9 @@ async function copySelected() {
                 symbol
             );
 
-        }
-    );
-
-
-    renderCurrentRows();
-}
-
-
-// =========================================================
-// VISIT SELECTED
-// =========================================================
-
-function visitSelected() {
-
-    selectedSymbols.forEach(
-        symbol => {
-
-            if (
-                !visitedSymbols.has(
-                    symbol
-                )
-            ) {
-
-                visitedSymbols.add(
-                    symbol
-                );
-
-            }
+            copiedSymbols.add(
+                symbol
+            );
 
         }
     );
@@ -168,7 +141,7 @@ function visitSelected() {
 
 function unvisitSelected() {
 
-    selectedSymbols.forEach(
+    copiedSymbols.forEach(
         symbol => {
 
             visitedSymbols.delete(
@@ -179,11 +152,19 @@ function unvisitSelected() {
     );
 
 
-    // Clear the entire selection
+    // Clear copied group
+
+    copiedSymbols.clear();
+
+
+    // Clear current selection
 
     selectedSymbols.clear();
 
-    rangeStartIndex = null;
+
+    // Reset Shift-click
+
+    lastClickedIndex = null;
 
 
     renderCurrentRows();
@@ -198,7 +179,7 @@ function clearSelection() {
 
     selectedSymbols.clear();
 
-    rangeStartIndex = null;
+    lastClickedIndex = null;
 }
 
 
@@ -211,9 +192,6 @@ function selectRange(
     endIndex,
     data
 ) {
-
-    selectedSymbols.clear();
-
 
     const firstIndex =
         Math.min(
@@ -228,6 +206,10 @@ function selectRange(
             endIndex
         );
 
+
+    // IMPORTANT:
+    // Do NOT clear existing selections.
+    // Shift-click adds the range.
 
     for (
         let i = firstIndex;
@@ -317,32 +299,8 @@ function renderCurrentRows() {
     }
 
 
-    table.innerHTML = "";
-
-
-    // =====================================================
-    // FIND LAST SELECTED INDEX
-    // =====================================================
-
-    let lastSelectedIndex = -1;
-
-
-    data.forEach(
-        (company, index) => {
-
-            if (
-                selectedSymbols.has(
-                    company.nseSymbol
-                )
-            ) {
-
-                lastSelectedIndex =
-                    index;
-
-            }
-
-        }
-    );
+    table.innerHTML =
+        "";
 
 
     // =====================================================
@@ -391,9 +349,7 @@ function renderCurrentRows() {
                 changeClass =
                     "positive";
 
-            }
-
-            else if (
+            } else if (
                 company.changePercent !== null &&
                 company.changePercent !== undefined &&
                 company.changePercent < 0
@@ -401,6 +357,7 @@ function renderCurrentRows() {
 
                 changeClass =
                     "negative";
+
             }
 
 
@@ -483,6 +440,7 @@ function renderCurrentRows() {
                 row.classList.add(
                     "visited-row"
                 );
+
             }
 
 
@@ -495,8 +453,10 @@ function renderCurrentRows() {
                     "td"
                 );
 
+
             rankCell.className =
                 "rank";
+
 
             rankCell.textContent =
                 index + 1;
@@ -558,86 +518,72 @@ function renderCurrentRows() {
             // =================================================
 
             checkbox.addEventListener(
-    "click",
-    event => {
+                "click",
+                event => {
 
-        event.stopPropagation();
+                    event.stopPropagation();
 
 
-        // =====================================================
-        // UNCHECKING
-        // =====================================================
+                    // =========================================
+                    // SHIFT + CLICK
+                    // =========================================
 
-        if (
-            selectedSymbols.has(symbol)
-        ) {
+                    if (
+                        event.shiftKey &&
+                        lastClickedIndex !== null
+                    ) {
 
-            selectedSymbols.delete(
-                symbol
+                        selectRange(
+                            lastClickedIndex,
+                            index,
+                            data
+                        );
+
+
+                        lastClickedIndex =
+                            index;
+
+
+                        renderCurrentRows();
+
+
+                        return;
+                    }
+
+
+                    // =========================================
+                    // NORMAL CLICK
+                    // =========================================
+
+                    if (
+                        checkbox.checked
+                    ) {
+
+                        selectedSymbols.add(
+                            symbol
+                        );
+
+                    } else {
+
+                        selectedSymbols.delete(
+                            symbol
+                        );
+
+                    }
+
+
+                    // Remember this row for
+                    // the next Shift + click
+
+                    lastClickedIndex =
+                        index;
+
+
+                    renderCurrentRows();
+
+                }
             );
 
-
-            /*
-             * Do NOT change the range start.
-             * Only this checkbox is removed.
-             */
-
-            renderCurrentRows();
-
-            return;
-        }
-
-
-        // =====================================================
-        // FIRST CHECK
-        // =====================================================
-
-        if (
-            rangeStartIndex === null
-        ) {
-
-            rangeStartIndex =
-                index;
-
-
-            selectedSymbols.clear();
-
-
-            selectedSymbols.add(
-                symbol
-            );
-
-
-            renderCurrentRows();
-
-            return;
-        }
-
-
-        // =====================================================
-        // SECOND CHECK → SELECT RANGE
-        // =====================================================
-
-        selectRange(
-            rangeStartIndex,
-            index,
-            data
-        );
-
-
-        /*
-         * Keep this clicked row as the
-         * starting point for a possible
-         * next range.
-         */
-
-        rangeStartIndex =
-            index;
-
-
-        renderCurrentRows();
-    }
-);
 
             // =================================================
             // SYMBOL TEXT
@@ -669,175 +615,156 @@ function renderCurrentRows() {
 
             // =================================================
             // ACTION BUTTONS
+            //
+            // IMPORTANT:
+            // These are INSIDE the symbol cell.
+            // They are hidden until this row is hovered.
             // =================================================
 
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+
+            actions.className =
+                "symbol-actions";
+
+
+            actions.style.display =
+                "none";
+
+
+            // =================================================
+            // COPY BUTTON
+            // =================================================
+
+            const copyButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            copyButton.type =
+                "button";
+
+
+            copyButton.className =
+                "symbol-action copy-action";
+
+
+            copyButton.textContent =
+                "Copy";
+
+
+            copyButton.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    copySelected();
+
+                }
+            );
+
+
+            actions.appendChild(
+                copyButton
+            );
+
+
+            // =================================================
+            // UNVISIT BUTTON
+            // =================================================
+
+            const state =
+                getSelectionState();
+
+
             if (
-                index ===
-                lastSelectedIndex
+                state.visitedCount > 0
             ) {
 
-                const actions =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                actions.className =
-                    "symbol-actions";
-
-
-                const state =
-                    getSelectionState();
-
-
-                // =============================================
-                // COPY
-                // =============================================
-
-                const copyButton =
+                const unvisitButton =
                     document.createElement(
                         "button"
                     );
 
 
-                copyButton.className =
-                    "symbol-action copy-action";
+                unvisitButton.type =
+                    "button";
 
 
-                copyButton.textContent =
-                    "Copy";
+                unvisitButton.className =
+                    "symbol-action unvisit-action";
 
 
-                copyButton.addEventListener(
+                unvisitButton.textContent =
+                    "Unvisit";
+
+
+                unvisitButton.addEventListener(
                     "click",
                     event => {
 
                         event.stopPropagation();
 
-                        copySelected();
+                        unvisitSelected();
+
                     }
                 );
 
 
                 actions.appendChild(
-                    copyButton
+                    unvisitButton
                 );
 
-
-                // =============================================
-                // ALL VISITED
-                // =============================================
-
-                if (
-                    state.visitedCount ===
-                    selectedSymbols.size
-                ) {
-
-                    const unvisitButton =
-                        document.createElement(
-                            "button"
-                        );
-
-
-                    unvisitButton.className =
-                        "symbol-action unvisit-action";
-
-
-                    unvisitButton.textContent =
-                        "Unvisit";
-
-
-                    unvisitButton.addEventListener(
-                        "click",
-                        event => {
-
-                            event.stopPropagation();
-
-                            unvisitSelected();
-                        }
-                    );
-
-
-                    actions.appendChild(
-                        unvisitButton
-                    );
-                }
-
-
-                // =============================================
-                // MIXED
-                // =============================================
-
-                else if (
-                    state.visitedCount > 0 &&
-                    state.unvisitedCount > 0
-                ) {
-
-                    const visitButton =
-                        document.createElement(
-                            "button"
-                        );
-
-
-                    visitButton.className =
-                        "symbol-action visit-action";
-
-
-                    visitButton.textContent =
-                        "Visit";
-
-
-                    visitButton.addEventListener(
-                        "click",
-                        event => {
-
-                            event.stopPropagation();
-
-                            visitSelected();
-                        }
-                    );
-
-
-                    const unvisitButton =
-                        document.createElement(
-                            "button"
-                        );
-
-
-                    unvisitButton.className =
-                        "symbol-action unvisit-action";
-
-
-                    unvisitButton.textContent =
-                        "Unvisit";
-
-
-                    unvisitButton.addEventListener(
-                        "click",
-                        event => {
-
-                            event.stopPropagation();
-
-                            unvisitSelected();
-                        }
-                    );
-
-
-                    actions.appendChild(
-                        visitButton
-                    );
-
-
-                    actions.appendChild(
-                        unvisitButton
-                    );
-                }
-
-
-                symbolContainer.appendChild(
-                    actions
-                );
             }
+
+
+            symbolContainer.appendChild(
+                actions
+            );
+
+
+            // =================================================
+            // SHOW ACTIONS WHEN MOUSE ENTERS THIS ROW
+            // =================================================
+
+            row.addEventListener(
+                "mouseenter",
+                () => {
+
+                    if (
+                        selectedSymbols.size === 0
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    actions.style.display =
+                        "flex";
+
+                }
+            );
+
+
+            // =================================================
+            // HIDE ACTIONS WHEN MOUSE LEAVES THIS ROW
+            // =================================================
+
+            row.addEventListener(
+                "mouseleave",
+                () => {
+
+                    actions.style.display =
+                        "none";
+
+                }
+            );
 
 
             symbolCell.appendChild(

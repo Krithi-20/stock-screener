@@ -514,6 +514,13 @@ tbody tr:hover {
     opacity: 0.85;
 }
 
+.floating-symbol-actions {
+    position: absolute;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    z-index: 1000;
+}
 
 /* =====================================================
    VISITED ROW
