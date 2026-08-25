@@ -108,6 +108,16 @@ public class CompanyController {
         return result;
     }
 
+        // =========================================================
+        // LIVE MARKET INDICES
+        // =========================================================
+
+        @GetMapping("/market/indices")
+        public Map<String, LiveQuote> getMarketIndices() {
+
+        return upstoxMarketDataService
+                .getIndexQuotes();
+        }
     // =========================================================
     // DTO
     // =========================================================

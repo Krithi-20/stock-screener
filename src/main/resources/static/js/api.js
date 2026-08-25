@@ -100,3 +100,17 @@ export async function loadCompanies() {
         return [];
     }
 }
+
+export async function loadMarketIndices() {
+
+    const response =
+        await fetch("/market/indices");
+
+    if (!response.ok) {
+        throw new Error(
+            "Failed to load market indices"
+        );
+    }
+
+    return await response.json();
+}

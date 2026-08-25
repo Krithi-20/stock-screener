@@ -34,6 +34,8 @@ public class UpstoxMarketDataService {
     private final Map<String, LiveQuote> liveQuotes =
             new ConcurrentHashMap<>();
 
+private final Map<String, LiveQuote> indexQuotes = new ConcurrentHashMap<>();
+
     private volatile MarketDataStreamerV3 streamer;
 
     private volatile boolean connected = false;
@@ -134,6 +136,12 @@ public class UpstoxMarketDataService {
                     "NSE_EQ|" + isin
             );
         }
+
+        instrumentKeys.add("NSE_INDEX|Nifty 500");
+        instrumentKeys.add("NSE_INDEX|Nifty 50");
+        instrumentKeys.add("NSE_INDEX|NIFTY MIDCAP 150");
+        instrumentKeys.add("NSE_INDEX|NIFTY SMLCAP 250");
+        instrumentKeys.add("NSE_INDEX|Nifty Bank");
 
         System.out.println();
         System.out.println(
@@ -399,7 +407,27 @@ public class UpstoxMarketDataService {
                         (change /
                                 previousClose)
                                 * 100.0;
+                /*
+                * Handle NSE indices separately.
+                */
+                if (instrumentKey.startsWith("NSE_INDEX|")) {
 
+                LiveQuote quote =
+                        new LiveQuote(
+                                lastPrice,
+                                previousClose,
+                                change,
+                                changePercent,
+                                lastTradeTime
+                        );
+
+                indexQuotes.put(
+                        instrumentKey,
+                        quote
+                );
+
+                continue;
+                }
                 /*
                  * Convert:
                  *
@@ -492,6 +520,10 @@ public class UpstoxMarketDataService {
                 liveQuotes
         );
     }
+
+    public Map<String, LiveQuote> getIndexQuotes() {
+        return indexQuotes;
+        }
 
     // =========================================================
     // GET ONE LIVE QUOTE

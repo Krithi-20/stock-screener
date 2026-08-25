@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
 
@@ -27,11 +28,14 @@ body {
 
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 25px;
 }
 
+.title-section {
+    margin-left: 25px;
+}
 
 .title-section h1 {
     margin: 0;
@@ -66,16 +70,17 @@ body {
 
 
 /* =====================================================
-   HEADER RIGHT
+   MARKET SECTION
    ===================================================== */
 
-.header-right {
+.market-section {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 35px;
+    margin-bottom: 20px;
 }
-
 
 /* =====================================================
    MARKET OVERVIEW
@@ -83,19 +88,21 @@ body {
 
 .market-overview {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 22px;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 35px;
 }
 
 
 .market-indicator {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 3px;
+    min-width: 125px;
     white-space: nowrap;
 }
-
 
 .market-name {
     font-size: 12px;
@@ -103,20 +110,24 @@ body {
     color: #374151;
 }
 
-
 .market-value {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #374151;
 }
 
+.market-change-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
 
 .market-change,
 .market-change-percent {
     font-size: 11px;
     font-weight: 500;
 }
-
 
 /* =====================================================
    MARKET COLORS
@@ -175,7 +186,6 @@ body {
 }
 
 
-    
 /* =====================================================
    STATUS
    ===================================================== */
@@ -220,29 +230,32 @@ body {
 /* =====================================================
    MARKET CAP FILTER
    ===================================================== */
-
 .market-cap-filter {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 5px;
+    margin-top: 0;
+    margin-left: auto;
 }
 
 
 .market-cap-filter label {
     font-size: 12px;
-    font-weight: 600;
-    color: #6b7280;
+    font-weight: 700;
+    color: #374151;
 }
 
-
 .market-cap-filter select {
-    padding: 7px 11px;
+    min-width: 125px;
+
+    padding: 8px 32px 8px 12px;
 
     border: 1px solid #d1d5db;
-    border-radius: 7px;
+    border-radius: 8px;
 
-    background: #ffffff;
+    background-color: #ffffff;
 
     font-size: 13px;
     font-weight: 600;
@@ -250,31 +263,24 @@ body {
 
     cursor: pointer;
 
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s,
-        background 0.2s;
-}
+    outline: none;
 
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
 
 .market-cap-filter select:hover {
     border-color: #9ca3af;
-    background: #fafafa;
+    background-color: #fafafa;
 }
 
-
 .market-cap-filter select:focus {
-    outline: none;
-
     border-color: #8b5cf6;
 
     box-shadow:
-        0 0 0 2px rgba(
-            139,
-            92,
-            246,
-            0.12
-        );
+        0 0 0 3px rgba(139, 92, 246, 0.12);
 }
 
 
@@ -584,20 +590,31 @@ tbody tr:hover {
     }
 
 
-    .header-right {
-        width: 100%;
+    .market-section {
+        display: flex;
+        flex-direction: row;
         align-items: flex-start;
+        justify-content: flex-start;
+        gap: 35px;
+        margin-bottom: 20px;
     }
 
 
     .market-overview {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
         justify-content: flex-start;
-        flex-wrap: wrap;
+        gap: 35px;
     }
 
-
     .market-cap-filter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: flex-start;
+        gap: 5px;
+        margin-top: 0;
     }
 
 
@@ -626,7 +643,7 @@ tbody tr:hover {
     }
 
 
-    .header-right {
+    .market-section {
         align-items: flex-start;
     }
 

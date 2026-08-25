@@ -1,5 +1,6 @@
 import {
-    loadCompanies
+    loadCompanies,
+    loadMarketIndices
 } from "./api.js";
 
 import {
@@ -38,7 +39,133 @@ async function refreshCompanies() {
     );
 }
 
+// =========================================================
+// MARKET INDICES
+// =========================================================
 
+async function refreshMarketIndices() {
+
+    try {
+
+        const indices =
+            await loadMarketIndices();
+
+        const status = document.getElementById("status");
+        status.classList.add("live");
+
+
+        updateIndex(
+            indices["NSE_INDEX|Nifty 500"],
+            "nifty500"
+        );
+
+
+        updateIndex(
+            indices["NSE_INDEX|Nifty 50"],
+            "nifty50"
+        );
+
+
+        updateIndex(
+            indices["NSE_INDEX|NIFTY MIDCAP 150"],
+            "midcap150"
+        );
+
+
+        updateIndex(
+            indices["NSE_INDEX|NIFTY SMLCAP 250"],
+            "smallcap250"
+        );
+
+
+        updateIndex(
+            indices["NSE_INDEX|Nifty Bank"],
+            "niftyBank"
+        );
+
+    } catch (error) {
+
+        const status = document.getElementById("status");
+        status.classList.remove("live");
+        
+        console.error(
+            "Failed to load market indices:",
+            error
+        );
+    }
+}
+
+
+// =========================================================
+// UPDATE ONE INDEX
+// =========================================================
+
+function updateIndex(
+    quote,
+    id
+) {
+
+    if (!quote) {
+        return;
+    }
+
+
+    const valueElement =
+        document.getElementById(
+            id + "Value"
+        );
+
+    const changeElement =
+        document.getElementById(
+            id + "Change"
+        );
+
+    const changePercentElement =
+        document.getElementById(
+            id + "ChangePercent"
+        );
+
+
+    valueElement.textContent =
+        quote.lastPrice.toFixed(2);
+
+
+    const changeSign =
+        quote.change > 0
+            ? "+"
+            : "";
+
+
+    changeElement.textContent =
+        changeSign +
+        quote.change.toFixed(2);
+
+
+    changePercentElement.textContent =
+        changeSign +
+        quote.changePercent.toFixed(2) +
+        "%";
+
+
+    const className =
+        quote.change > 0
+            ? "market-positive"
+            : quote.change < 0
+                ? "market-negative"
+                : "market-neutral";
+
+
+    valueElement.className =
+        "market-value";
+
+    changeElement.className =
+        "market-change " +
+        className;
+
+    changePercentElement.className =
+        "market-change-percent " +
+        className;
+}
 // =========================================================
 // MARKET CAP CHANGED
 // =========================================================
@@ -158,12 +285,16 @@ document
 
 refreshCompanies();
 
+refreshMarketIndices();
 
-// =========================================================
-// UI REFRESH
-// =========================================================
 
 setInterval(
     refreshCompanies,
+    1000
+);
+
+
+setInterval(
+    refreshMarketIndices,
     1000
 );
