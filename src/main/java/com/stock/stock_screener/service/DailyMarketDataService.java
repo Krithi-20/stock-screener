@@ -94,13 +94,16 @@ public class DailyMarketDataService {
     private final HttpClient httpClient;
 
     private final NseDownloadService nseDownloadService;
+    private final BseDownloadService bseDownloadService;
 
     public DailyMarketDataService(
-            NseDownloadService nseDownloadService
+            NseDownloadService nseDownloadService, BseDownloadService bseDownloadService
     ) {
 
         this.nseDownloadService =
                 nseDownloadService;
+
+        this.bseDownloadService = bseDownloadService;
 
         this.httpClient =
                 HttpClient.newBuilder()
@@ -236,6 +239,17 @@ public class DailyMarketDataService {
          */
         nseDownloadService
                 .downloadPreviousTradingDayFile();
+
+        // =====================================================
+        // 2. BSE SECURITY MASTER
+        // =====================================================
+
+        /*
+        * Completely handled by BseDownloadService.
+        */
+        bseDownloadService
+                .downloadPreviousTradingDayFile();
+
 
         // =====================================================
         // 2. NSE BHAVCOPY
