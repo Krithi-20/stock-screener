@@ -444,13 +444,11 @@ tbody tr:hover {
 
 .symbol-cell {
     position: relative;
-
     display: flex;
     align-items: center;
-
+    gap: 7px;
     min-width: 180px;
 }
-
 
 .symbol-checkbox {
     width: 15px;

@@ -101,20 +101,20 @@ async function copySelected() {
     const symbols =
         [...selectedSymbols];
 
-
     if (symbols.length === 0) {
         return;
     }
 
 
-    // Copy selected NSE symbols
+    // Copy ONLY currently checked symbols
 
     await copySymbols(
         symbols
     );
 
 
-    // Mark copied symbols as visited
+    // Mark ONLY currently checked symbols
+    // as visited
 
     symbols.forEach(
         symbol => {
@@ -133,7 +133,6 @@ async function copySelected() {
 
     renderCurrentRows();
 }
-
 
 // =========================================================
 // UNVISIT SELECTED

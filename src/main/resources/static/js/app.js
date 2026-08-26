@@ -51,7 +51,34 @@ async function refreshMarketIndices() {
             await loadMarketIndices();
 
         const status = document.getElementById("status");
-        status.classList.add("live");
+
+        const now = new Date();
+
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+
+        const currentMinutes =
+            hours * 60 + minutes;
+
+        const marketOpen =
+            9 * 60 + 15;
+
+        const marketClose =
+            15 * 60 + 30;
+
+        const isWeekday =
+            now.getDay() >= 1 &&
+            now.getDay() <= 5;
+
+        const isMarketOpen =
+            isWeekday &&
+            currentMinutes >= marketOpen &&
+            currentMinutes <= marketClose;
+
+        status.classList.toggle(
+            "live",
+            isMarketOpen
+        );
 
 
         updateIndex(
@@ -59,24 +86,20 @@ async function refreshMarketIndices() {
             "nifty500"
         );
 
-
         updateIndex(
             indices["NSE_INDEX|Nifty 50"],
             "nifty50"
         );
-
 
         updateIndex(
             indices["NSE_INDEX|NIFTY MIDCAP 150"],
             "midcap150"
         );
 
-
         updateIndex(
             indices["NSE_INDEX|NIFTY SMLCAP 250"],
             "smallcap250"
         );
-
 
         updateIndex(
             indices["NSE_INDEX|Nifty Bank"],
@@ -85,17 +108,17 @@ async function refreshMarketIndices() {
 
     } catch (error) {
 
-        const status = document.getElementById("status");
+        const status =
+            document.getElementById("status");
+
         status.classList.remove("live");
-        
+
         console.error(
             "Failed to load market indices:",
             error
         );
     }
 }
-
-
 // =========================================================
 // UPDATE ONE INDEX
 // =========================================================
