@@ -33,7 +33,7 @@ let currentView = "all";
 async function copySymbols(symbols) {
 
     if (symbols.length === 0) {
-        return;
+        return false;
     }
 
     const text =
@@ -45,12 +45,16 @@ async function copySymbols(symbols) {
             text
         );
 
+        return true;
+
     } catch (error) {
 
         console.error(
             "Copy failed:",
             error
         );
+
+        return false;
     }
 }
 
@@ -96,7 +100,7 @@ function getSelectionState() {
 // COPY SELECTED
 // =========================================================
 
-async function copySelected() {
+async function copySelected(button) {
 
     const symbols =
         [...selectedSymbols];
@@ -106,33 +110,122 @@ async function copySelected() {
     }
 
 
+    // Prevent double-clicking while
+    // the copy operation is running
+
+    if (
+        button.disabled
+    ) {
+
+        return;
+
+    }
+
+
+    button.disabled = true;
+
+
     // Copy ONLY currently checked symbols
 
-    await copySymbols(
-        symbols
-    );
+    const copied =
+        await copySymbols(
+            symbols
+        );
 
 
-    // Mark ONLY currently checked symbols
-    // as visited
+    // Only update the UI if copying
+    // actually succeeded
 
-    symbols.forEach(
-        symbol => {
+    if (
+        copied
+    ) {
 
-            visitedSymbols.add(
-                symbol
-            );
+        // Mark ONLY currently checked symbols
+        // as visited
 
-            copiedSymbols.add(
-                symbol
-            );
+        symbols.forEach(
+            symbol => {
 
-        }
-    );
+                visitedSymbols.add(
+                    symbol
+                );
+
+                copiedSymbols.add(
+                    symbol
+                );
+
+            }
+        );
 
 
-    renderCurrentRows();
+        // Show successful copy state
+
+        button.textContent =
+            "✓ Copied";
+
+        button.classList.add(
+            "copied"
+        );
+
+
+        // Keep the button visible while
+        // showing the success message
+
+        button.disabled =
+            true;
+
+
+        // Reset button after 1.5 seconds
+
+        setTimeout(
+            () => {
+
+                button.textContent =
+                    "Copy";
+
+                button.classList.remove(
+                    "copied"
+                );
+
+                button.disabled =
+                    false;
+
+            },
+            1500
+        );
+
+    } else {
+
+        // Copy failed
+
+        button.textContent =
+            "Copy failed";
+
+        button.classList.add(
+            "copy-failed"
+        );
+
+
+        setTimeout(
+            () => {
+
+                button.textContent =
+                    "Copy";
+
+                button.classList.remove(
+                    "copy-failed"
+                );
+
+                button.disabled =
+                    false;
+
+            },
+            1500
+        );
+
+    }
 }
+
 
 // =========================================================
 // UNVISIT SELECTED
@@ -140,20 +233,19 @@ async function copySelected() {
 
 function unvisitSelected() {
 
-    copiedSymbols.forEach(
+    selectedSymbols.forEach(
         symbol => {
 
             visitedSymbols.delete(
                 symbol
             );
 
+            copiedSymbols.delete(
+                symbol
+            );
+
         }
     );
-
-
-    // Clear copied group
-
-    copiedSymbols.clear();
 
 
     // Clear current selection
@@ -662,7 +754,9 @@ function renderCurrentRows() {
 
                     event.stopPropagation();
 
-                    copySelected();
+                    copySelected(
+                        copyButton
+                    );
 
                 }
             );

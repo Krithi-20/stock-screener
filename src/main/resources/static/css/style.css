@@ -33,9 +33,11 @@ body {
     margin-bottom: 25px;
 }
 
+
 .title-section {
     margin-left: 25px;
 }
+
 
 .title-section h1 {
     margin: 0;
@@ -82,6 +84,7 @@ body {
     margin-bottom: 20px;
 }
 
+
 /* =====================================================
    MARKET OVERVIEW
    ===================================================== */
@@ -104,17 +107,20 @@ body {
     white-space: nowrap;
 }
 
+
 .market-name {
     font-size: 12px;
     font-weight: 700;
     color: #374151;
 }
 
+
 .market-value {
     font-size: 14px;
     font-weight: 600;
     color: #374151;
 }
+
 
 .market-change-row {
     display: flex;
@@ -123,11 +129,13 @@ body {
     gap: 6px;
 }
 
+
 .market-change,
 .market-change-percent {
     font-size: 11px;
     font-weight: 500;
 }
+
 
 /* =====================================================
    MARKET COLORS
@@ -230,6 +238,7 @@ body {
 /* =====================================================
    MARKET CAP FILTER
    ===================================================== */
+
 .market-cap-filter {
     display: flex;
     flex-direction: column;
@@ -246,6 +255,7 @@ body {
     font-weight: 700;
     color: #374151;
 }
+
 
 .market-cap-filter select {
     min-width: 125px;
@@ -271,10 +281,12 @@ body {
         background-color 0.2s ease;
 }
 
+
 .market-cap-filter select:hover {
     border-color: #9ca3af;
     background-color: #fafafa;
 }
+
 
 .market-cap-filter select:focus {
     border-color: #8b5cf6;
@@ -446,9 +458,20 @@ tbody tr:hover {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 7px;
-    min-width: 180px;
+
+    /*
+     * More breathing room between the
+     * checkbox, symbol and action buttons.
+     */
+    gap: 10px;
+
+    /*
+     * Reserve enough space for the
+     * symbol + action buttons.
+     */
+    min-width: 250px;
 }
+
 
 .symbol-checkbox {
     width: 15px;
@@ -465,6 +488,12 @@ tbody tr:hover {
 
 .symbol-text {
     white-space: nowrap;
+
+    /*
+     * Keeps the symbol from being
+     * pushed underneath the buttons.
+     */
+    flex-shrink: 0;
 }
 
 
@@ -475,31 +504,78 @@ tbody tr:hover {
 .symbol-actions {
     position: absolute;
 
-    left: 105px;
+    /*
+     * Moved farther away from the
+     * symbol text.
+     */
+    left: 135px;
 
     display: flex;
     align-items: center;
 
-    gap: 5px;
+    gap: 6px;
 
     white-space: nowrap;
 
     z-index: 5;
+
+    /*
+     * Smooth appearance.
+     */
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
 }
 
+
+/* =====================================================
+   ACTION BUTTONS
+   ===================================================== */
 
 .symbol-action {
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
 
-    padding: 3px 8px;
+    padding: 6px 12px;
 
-    font-size: 11px;
+    min-width: 58px;
+    min-height: 30px;
+
+    font-size: 12px;
     font-weight: 600;
 
     cursor: pointer;
+
+    /*
+     * Same smooth behavior for
+     * Copy / Visit / Unvisit.
+     */
+    transition:
+        opacity 0.15s ease,
+        transform 0.1s ease,
+        background-color 0.2s ease;
 }
 
+
+.symbol-action:hover {
+    opacity: 0.9;
+}
+
+
+.symbol-action:active {
+    transform: scale(0.96);
+}
+
+
+.symbol-action:disabled {
+    cursor: default;
+    opacity: 0.9;
+}
+
+
+/* =====================================================
+   COPY BUTTON
+   ===================================================== */
 
 .copy-action {
     background: #111827;
@@ -507,11 +583,29 @@ tbody tr:hover {
 }
 
 
+.copy-action.copied {
+    background: #16803c;
+}
+
+
+.copy-action.copy-failed {
+    background: #d32f2f;
+}
+
+
+/* =====================================================
+   VISIT BUTTON
+   ===================================================== */
+
 .visit-action {
     background: #16803c;
     color: white;
 }
 
+
+/* =====================================================
+   UNVISIT BUTTON
+   ===================================================== */
 
 .unvisit-action {
     background: #e5e7eb;
@@ -519,9 +613,10 @@ tbody tr:hover {
 }
 
 
-.symbol-action:hover {
-    opacity: 0.85;
+.unvisit-action:hover {
+    background: #d1d5db;
 }
+
 
 .floating-symbol-actions {
     position: absolute;
@@ -530,6 +625,7 @@ tbody tr:hover {
     gap: 5px;
     z-index: 1000;
 }
+
 
 /* =====================================================
    VISITED ROW
@@ -624,6 +720,7 @@ tbody tr:hover {
         gap: 35px;
     }
 
+
     .market-cap-filter {
         display: flex;
         flex-direction: column;
@@ -676,3 +773,4 @@ tbody tr:hover {
     }
 
 }
+
