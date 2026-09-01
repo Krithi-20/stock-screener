@@ -13,6 +13,34 @@ import {
 // SELECTION / VISITED STATE
 // =========================================================
 
+// Each tab/view gets its own completely independent state.
+
+const tabStates = new Map();
+
+function getTabState(view) {
+
+    if (!tabStates.has(view)) {
+
+        tabStates.set(
+            view,
+            {
+                selectedSymbols: new Set(),
+                visitedSymbols: new Set(),
+                copiedSymbols: new Set(),
+                lastClickedIndex: null
+            }
+        );
+
+    }
+
+    return tabStates.get(view);
+}
+
+
+// =========================================================
+// CURRENT STATE
+// =========================================================
+
 let selectedSymbols = new Set();
 
 let visitedSymbols = new Set();
@@ -27,6 +55,54 @@ let currentView = "all";
 
 
 // =========================================================
+// ACTIVATE TAB STATE
+// =========================================================
+
+function activateTabState(view) {
+
+    const state =
+        getTabState(view);
+
+    selectedSymbols =
+        state.selectedSymbols;
+
+    visitedSymbols =
+        state.visitedSymbols;
+
+    copiedSymbols =
+        state.copiedSymbols;
+
+    lastClickedIndex =
+        state.lastClickedIndex;
+
+}
+
+
+// =========================================================
+// SAVE CURRENT TAB STATE
+// =========================================================
+
+function saveCurrentTabState() {
+
+    const state =
+        getTabState(currentView);
+
+    state.selectedSymbols =
+        selectedSymbols;
+
+    state.visitedSymbols =
+        visitedSymbols;
+
+    state.copiedSymbols =
+        copiedSymbols;
+
+    state.lastClickedIndex =
+        lastClickedIndex;
+
+}
+
+
+// =========================================================
 // COPY SYMBOLS
 // =========================================================
 
@@ -36,8 +112,50 @@ async function copySymbols(symbols) {
         return false;
     }
 
-    const text =
-        symbols.join("\n");
+    const text = symbols
+        .map(symbol => {
+
+            const company =
+                currentCompanies.find(
+                    item => item.nseSymbol === symbol
+                );
+
+            if (!company) {
+                return symbol;
+            }
+
+            const changePercent =
+                company.changePercent !== null &&
+                company.changePercent !== undefined
+                    ? formatPercent(
+                          company.changePercent
+                      )
+                    : "—";
+
+            const livePrice =
+                company.livePrice !== null &&
+                company.livePrice !== undefined
+                    ? "₹" +
+                      Number(
+                          company.livePrice
+                      ).toLocaleString(
+                          "en-IN",
+                          {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                          }
+                      )
+                    : "—";
+
+            return (
+                symbol +
+                "\t" +
+                changePercent +
+                "\t" +
+                livePrice
+            );
+        })
+        .join("\n");
 
     try {
 
@@ -126,6 +244,7 @@ async function copySelected(button) {
 
 
     // Copy ONLY currently checked symbols
+    // from the CURRENT TAB
 
     const copied =
         await copySymbols(
@@ -141,7 +260,7 @@ async function copySelected(button) {
     ) {
 
         // Mark ONLY currently checked symbols
-        // as visited
+        // in the CURRENT TAB as visited
 
         symbols.forEach(
             symbol => {
@@ -156,6 +275,11 @@ async function copySelected(button) {
 
             }
         );
+
+
+        // Save this tab's state
+
+        saveCurrentTabState();
 
 
         // Show successful copy state
@@ -258,6 +382,11 @@ function unvisitSelected() {
     lastClickedIndex = null;
 
 
+    // Save ONLY this tab's state
+
+    saveCurrentTabState();
+
+
     renderCurrentRows();
 }
 
@@ -271,6 +400,8 @@ function clearSelection() {
     selectedSymbols.clear();
 
     lastClickedIndex = null;
+
+    saveCurrentTabState();
 }
 
 
@@ -313,6 +444,7 @@ function selectRange(
         );
 
     }
+
 }
 
 
@@ -325,11 +457,25 @@ export function render(
     view
 ) {
 
+    // Save the state of the tab we are
+    // leaving BEFORE changing currentView
+
+    saveCurrentTabState();
+
+
     currentCompanies =
         companies;
 
     currentView =
         view;
+
+
+    // Load the independent state belonging
+    // to the new tab
+
+    activateTabState(
+        currentView
+    );
 
 
     renderCurrentRows();
@@ -635,6 +781,9 @@ function renderCurrentRows() {
                             index;
 
 
+                        saveCurrentTabState();
+
+
                         renderCurrentRows();
 
 
@@ -668,6 +817,11 @@ function renderCurrentRows() {
 
                     lastClickedIndex =
                         index;
+
+
+                    // Save ONLY this tab's state
+
+                    saveCurrentTabState();
 
 
                     renderCurrentRows();
