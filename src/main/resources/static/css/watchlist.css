@@ -1,0 +1,449 @@
+/* =====================================================
+   WATCHLIST
+   ===================================================== */
+
+.watchlist-container {
+    background: #ffffff;
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 10px rgba(
+            0,
+            0,
+            0,
+            0.06
+        );
+
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   WATCHLIST HEADER
+   ===================================================== */
+
+.watchlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #eef0f2;
+}
+
+
+.watchlist-header h2 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+/* =====================================================
+   CREATE WATCHLIST +
+   ===================================================== */
+
+.watchlist-add-button {
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #111827;
+    color: white;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+}
+
+
+.watchlist-add-button:hover {
+    background: #374151;
+}
+
+
+.watchlist-add-button:active {
+    transform: scale(0.95);
+}
+
+
+.watchlist-add-button:disabled {
+    background: #d1d5db;
+    cursor: default;
+}
+
+
+/* =====================================================
+   WATCHLIST LIST BAR
+   ===================================================== */
+
+.watchlist-list-bar {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 20px;
+
+    overflow-x: auto;
+
+    border-bottom: 1px solid #eef0f2;
+}
+
+
+.watchlist-list-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+
+.watchlist-list-button {
+    border: none;
+    border-radius: 7px;
+
+    padding: 9px 32px 9px 14px;
+
+    background: #e5e7eb;
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.watchlist-list-button:hover {
+    background: #d1d5db;
+}
+
+
+.watchlist-list-button.active {
+    background: #111827;
+    color: white;
+}
+
+
+/* =====================================================
+   DELETE WATCHLIST
+   ===================================================== */
+
+.watchlist-delete-list {
+    position: absolute;
+
+    right: 7px;
+
+    border: none;
+    background: transparent;
+
+    color: #9ca3af;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    padding: 0;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.watchlist-list-wrapper:hover
+.watchlist-delete-list {
+    opacity: 1;
+}
+
+
+.watchlist-delete-list:hover {
+    color: #6b7280;
+}
+
+
+/* =====================================================
+   ACTIVE LIST HEADER
+   ===================================================== */
+
+.watchlist-list-header {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 15px 20px;
+
+    border-bottom: 1px solid #eef0f2;
+}
+
+
+.watchlist-list-title {
+    font-size: 15px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+.watchlist-list-count {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+
+.watchlist-symbol-add {
+    margin-left: auto;
+
+    border: none;
+    border-radius: 6px;
+
+    padding: 7px 12px;
+
+    background: #111827;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+}
+
+
+.watchlist-symbol-add:hover {
+    background: #374151;
+}
+
+
+.watchlist-symbol-add:active {
+    transform: scale(0.96);
+}
+
+
+.watchlist-symbol-add:disabled {
+    background: #d1d5db;
+    cursor: default;
+}
+
+
+/* =====================================================
+   WATCHLIST TABLE
+   ===================================================== */
+
+.watchlist-table-container {
+    overflow-x: auto;
+}
+
+
+.watchlist-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+
+.watchlist-table thead {
+    background: #111827;
+    color: white;
+}
+
+
+.watchlist-table th {
+    padding: 13px 18px;
+
+    text-align: left;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.watchlist-table td {
+    padding: 13px 18px;
+
+    border-bottom: 1px solid #eef0f2;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+}
+
+
+.watchlist-row {
+    position: relative;
+
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.watchlist-row:hover {
+    background: #f9fafb;
+}
+
+
+/* =====================================================
+   SYMBOL
+   ===================================================== */
+
+.watchlist-symbol {
+    font-weight: 700;
+
+    color: #1f2937;
+}
+
+
+/* =====================================================
+   CHANGE COLORS
+   ===================================================== */
+
+.watchlist-positive {
+    color: #16803c;
+    font-weight: 700;
+}
+
+
+.watchlist-negative {
+    color: #d32f2f;
+    font-weight: 700;
+}
+
+
+.watchlist-neutral {
+    color: #6b7280;
+}
+
+
+/* =====================================================
+   DELETE SYMBOL
+   ===================================================== */
+
+.watchlist-delete-symbol {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 24px;
+    height: 24px;
+
+    border: none;
+    background: transparent;
+
+    color: #c4c7cc;
+
+    font-size: 18px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.watchlist-row:hover
+.watchlist-delete-symbol {
+    opacity: 1;
+}
+
+
+.watchlist-delete-symbol:hover {
+    color: #8f949b;
+}
+
+
+/* =====================================================
+   EMPTY STATES
+   ===================================================== */
+
+.watchlist-empty,
+.watchlist-empty-list {
+    text-align: center;
+
+    padding: 45px 20px;
+
+    color: #6b7280;
+}
+
+
+.watchlist-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #374151;
+
+    margin-bottom: 6px;
+}
+
+
+.watchlist-empty-text {
+    font-size: 13px;
+}
+
+
+.watchlist-empty-list {
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .watchlist-header {
+        padding: 15px;
+    }
+
+
+    .watchlist-list-bar {
+        padding: 10px 15px;
+    }
+
+
+    .watchlist-list-header {
+        padding: 13px 15px;
+    }
+
+
+    .watchlist-table th,
+    .watchlist-table td {
+        padding: 11px 15px;
+    }
+
+}

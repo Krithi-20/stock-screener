@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,6 +15,11 @@
     <link
         rel="stylesheet"
         href="/css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/watchlist.css"
     >
 
     <link
@@ -92,19 +96,22 @@
                     id="nifty500Value">
                     -
                 </span>
-                <div class = "market-change-row">
-                <span
-                    class="market-change"
-                    id="nifty500Change">
-                    -
-                </span>
 
-                <span
-                    class="market-change-percent"
-                    id="nifty500ChangePercent">
-                    -
-                </span>
-            </div>
+                <div class="market-change-row">
+
+                    <span
+                        class="market-change"
+                        id="nifty500Change">
+                        -
+                    </span>
+
+                    <span
+                        class="market-change-percent"
+                        id="nifty500ChangePercent">
+                        -
+                    </span>
+
+                </div>
 
             </div>
 
@@ -120,19 +127,23 @@
                     id="nifty50Value">
                     -
                 </span>
-                <div class = "market-change-row">
-                <span
-                    class="market-change"
-                    id="nifty50Change">
-                    -
-                </span>
 
-                <span
-                    class="market-change-percent"
-                    id="nifty50ChangePercent">
-                    -
-                </span>
-            </div>
+                <div class="market-change-row">
+
+                    <span
+                        class="market-change"
+                        id="nifty50Change">
+                        -
+                    </span>
+
+                    <span
+                        class="market-change-percent"
+                        id="nifty50ChangePercent">
+                        -
+                    </span>
+
+                </div>
+
             </div>
 
 
@@ -147,18 +158,21 @@
                     id="midcap150Value">
                     -
                 </span>
-                <div class = "market-change-row">
-                <span
-                    class="market-change"
-                    id="midcap150Change">
-                    -
-                </span>
 
-                <span
-                    class="market-change-percent"
-                    id="midcap150ChangePercent">
-                    -
-                </span>
+                <div class="market-change-row">
+
+                    <span
+                        class="market-change"
+                        id="midcap150Change">
+                        -
+                    </span>
+
+                    <span
+                        class="market-change-percent"
+                        id="midcap150ChangePercent">
+                        -
+                    </span>
+
                 </div>
 
             </div>
@@ -175,18 +189,21 @@
                     id="smallcap250Value">
                     -
                 </span>
-                <div class = "market-change-row">
-                <span
-                    class="market-change"
-                    id="smallcap250Change">
-                    -
-                </span>
 
-                <span
-                    class="market-change-percent"
-                    id="smallcap250ChangePercent">
-                    -
-                </span>
+                <div class="market-change-row">
+
+                    <span
+                        class="market-change"
+                        id="smallcap250Change">
+                        -
+                    </span>
+
+                    <span
+                        class="market-change-percent"
+                        id="smallcap250ChangePercent">
+                        -
+                    </span>
+
                 </div>
 
             </div>
@@ -204,18 +221,20 @@
                     -
                 </span>
 
-                <div class = "market-change-row">
-                <span
-                    class="market-change"
-                    id="niftyBankChange">
-                    -
-                </span>
+                <div class="market-change-row">
 
-                <span
-                    class="market-change-percent"
-                    id="niftyBankChangePercent">
-                    -
-                </span>
+                    <span
+                        class="market-change"
+                        id="niftyBankChange">
+                        -
+                    </span>
+
+                    <span
+                        class="market-change-percent"
+                        id="niftyBankChangePercent">
+                        -
+                    </span>
+
                 </div>
 
             </div>
@@ -270,8 +289,7 @@
 
         <button
             class="tab active"
-            id="allTab"
-            onclick="showAll()">
+            id="allTab">
 
             All Companies
 
@@ -280,8 +298,7 @@
 
         <button
             class="tab"
-            id="performersTab"
-            onclick="showPerformers()">
+            id="performersTab">
 
             Top Performers
 
@@ -290,10 +307,18 @@
 
         <button
             class="tab"
-            id="losersTab"
-            onclick="showLosers()">
+            id="losersTab">
 
             Top Losers
+
+        </button>
+
+
+        <button
+            class="tab"
+            id="watchlistTab">
+
+            Watchlist
 
         </button>
 
@@ -301,7 +326,7 @@
 
 
     <!-- =====================================================
-         TABLE
+         STOCK TABLE
          ===================================================== -->
 
     <div class="table-container">
@@ -371,6 +396,21 @@
 
 
     <!-- =====================================================
+         WATCHLIST
+         ===================================================== -->
+
+    <div
+        id="watchlistContainer"
+        class="watchlist-container"
+        style="display: none;"
+    >
+
+        <div id="watchlistContent"></div>
+
+    </div>
+
+
+    <!-- =====================================================
          FOOTER
          ===================================================== -->
 
@@ -389,6 +429,10 @@
 </div>
 
 
+<!-- =====================================================
+     APPLICATION
+     ===================================================== -->
+
 <script
     type="module"
     src="/js/app.js">
@@ -398,3 +442,4 @@
 </body>
 
 </html>
+

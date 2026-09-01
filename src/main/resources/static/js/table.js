@@ -8,6 +8,10 @@ import {
     escapeHtml
 } from "./utils.js";
 
+import {
+    addSymbolFromTable
+} from "./watchlist.js";
+
 
 // =========================================================
 // SELECTION / VISITED STATE
@@ -920,6 +924,45 @@ function renderCurrentRows() {
                 copyButton
             );
 
+            // =================================================
+// ADD TO WATCHLIST BUTTON
+// =================================================
+
+const watchlistButton =
+    document.createElement(
+        "button"
+    );
+
+
+watchlistButton.type =
+    "button";
+
+
+watchlistButton.className =
+    "symbol-action watchlist-action";
+
+
+watchlistButton.textContent =
+    "+ List";
+
+
+watchlistButton.addEventListener(
+    "click",
+    event => {
+
+        event.stopPropagation();
+
+        addSymbolFromTable(
+            symbol
+        );
+
+    }
+);
+
+
+actions.appendChild(
+    watchlistButton
+);
 
             // =================================================
             // UNVISIT BUTTON

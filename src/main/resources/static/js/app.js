@@ -11,6 +11,11 @@ import {
     setActiveTab
 } from "./tabs.js";
 
+import {
+    initializeWatchlists,
+    renderWatchlists
+} from "./watchlist.js";
+
 
 // =========================================================
 // GLOBAL STATE
@@ -33,11 +38,25 @@ async function refreshCompanies() {
     companies =
         data;
 
+
+    if (
+        currentView === "watchlist"
+    ) {
+
+        renderWatchlists(
+            companies
+        );
+
+        return;
+    }
+
+
     render(
         companies,
         currentView
     );
 }
+
 
 // =========================================================
 // MARKET INDICES
@@ -50,12 +69,17 @@ async function refreshMarketIndices() {
         const indices =
             await loadMarketIndices();
 
-        const status = document.getElementById("status");
+        const status =
+            document.getElementById("status");
 
-        const now = new Date();
+        const now =
+            new Date();
 
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
+        const hours =
+            now.getHours();
+
+        const minutes =
+            now.getMinutes();
 
         const currentMinutes =
             hours * 60 + minutes;
@@ -86,20 +110,24 @@ async function refreshMarketIndices() {
             "nifty500"
         );
 
+
         updateIndex(
             indices["NSE_INDEX|Nifty 50"],
             "nifty50"
         );
+
 
         updateIndex(
             indices["NSE_INDEX|NIFTY MIDCAP 150"],
             "midcap150"
         );
 
+
         updateIndex(
             indices["NSE_INDEX|NIFTY SMLCAP 250"],
             "smallcap250"
         );
+
 
         updateIndex(
             indices["NSE_INDEX|Nifty Bank"],
@@ -111,7 +139,9 @@ async function refreshMarketIndices() {
         const status =
             document.getElementById("status");
 
-        status.classList.remove("live");
+        status.classList.remove(
+            "live"
+        );
 
         console.error(
             "Failed to load market indices:",
@@ -119,6 +149,8 @@ async function refreshMarketIndices() {
         );
     }
 }
+
+
 // =========================================================
 // UPDATE ONE INDEX
 // =========================================================
@@ -189,6 +221,8 @@ function updateIndex(
         "market-change-percent " +
         className;
 }
+
+
 // =========================================================
 // MARKET CAP CHANGED
 // =========================================================
@@ -207,6 +241,39 @@ function changeMarketCap() {
 
 
 // =========================================================
+// SHOW WATCHLISTS
+// =========================================================
+
+function showWatchlists() {
+
+    currentView =
+        "watchlist";
+
+
+    setActiveTab(
+        "watchlistTab"
+    );
+
+
+    document
+        .querySelector(".table-container")
+        .style.display =
+        "none";
+
+
+    document
+        .getElementById("watchlistContainer")
+        .style.display =
+        "block";
+
+
+    renderWatchlists(
+        companies
+    );
+}
+
+
+// =========================================================
 // ALL COMPANIES
 // =========================================================
 
@@ -218,6 +285,19 @@ function showAll() {
     setActiveTab(
         "allTab"
     );
+
+
+    document
+        .querySelector(".table-container")
+        .style.display =
+        "block";
+
+
+    document
+        .getElementById("watchlistContainer")
+        .style.display =
+        "none";
+
 
     render(
         companies,
@@ -239,6 +319,19 @@ function showPerformers() {
         "performersTab"
     );
 
+
+    document
+        .querySelector(".table-container")
+        .style.display =
+        "block";
+
+
+    document
+        .getElementById("watchlistContainer")
+        .style.display =
+        "none";
+
+
     render(
         companies,
         currentView
@@ -258,6 +351,19 @@ function showLosers() {
     setActiveTab(
         "losersTab"
     );
+
+
+    document
+        .querySelector(".table-container")
+        .style.display =
+        "block";
+
+
+    document
+        .getElementById("watchlistContainer")
+        .style.display =
+        "none";
+
 
     render(
         companies,
@@ -302,9 +408,19 @@ document
     );
 
 
+document
+    .getElementById("watchlistTab")
+    .addEventListener(
+        "click",
+        showWatchlists
+    );
+
+
 // =========================================================
 // INITIAL LOAD
 // =========================================================
+
+initializeWatchlists();
 
 refreshCompanies();
 

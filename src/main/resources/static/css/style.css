@@ -774,3 +774,16 @@ tbody tr:hover {
 
 }
 
+/* =====================================================
+   WATCHLIST ACTION
+   ===================================================== */
+
+.watchlist-action {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+
+.watchlist-action:hover {
+    background: #d1d5db;
+}
