@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.PathVariable;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +14,8 @@ import com.stock.stock_screener.model.Company;
 import com.stock.stock_screener.service.CompanyFilterService;
 import com.stock.stock_screener.service.UpstoxMarketDataService;
 import com.stock.stock_screener.service.UpstoxMarketDataService.LiveQuote;
+import com.stock.stock_screener.service.HistoricalCandleService;
+import com.stock.stock_screener.service.HistoricalCandleService.Candle;
 
 @RestController
 public class CompanyController {
@@ -20,15 +24,20 @@ public class CompanyController {
 
     private final UpstoxMarketDataService upstoxMarketDataService;
 
+    private final HistoricalCandleService historicalCandleService;
+
     public CompanyController(
             CompanyFilterService companyFilterService,
-            UpstoxMarketDataService upstoxMarketDataService) {
+            UpstoxMarketDataService upstoxMarketDataService, HistoricalCandleService historicalCandleService) {
 
         this.companyFilterService =
                 companyFilterService;
 
         this.upstoxMarketDataService =
                 upstoxMarketDataService;
+
+        this.historicalCandleService =
+        historicalCandleService;
     }
 
     // =========================================================
@@ -118,6 +127,21 @@ public class CompanyController {
         return upstoxMarketDataService
                 .getIndexQuotes();
         }
+
+        // =========================================================
+// HISTORICAL CANDLES
+// =========================================================
+
+@GetMapping("/companies/{symbol}/candles")
+public List<Candle> getHistoricalCandles(
+        @PathVariable String symbol)
+        throws Exception {
+
+    return historicalCandleService
+            .getDailyCandles(
+                    symbol
+            );
+}
     // =========================================================
     // DTO
     // =========================================================

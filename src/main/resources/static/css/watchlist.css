@@ -448,6 +448,7 @@
 
 }
 
+
 /* =====================================================
    ADD TO WATCHLIST POPOVER
    ===================================================== */
@@ -761,6 +762,549 @@
         top: 15px;
 
         max-width: none;
+    }
+
+}
+
+
+/* =====================================================
+   CHARTS BUTTON
+   ===================================================== */
+
+.watchlist-header-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-left: auto;
+}
+
+
+.watchlist-charts-button {
+    border: 1px solid #d7d7d7;
+
+    background: #ffffff;
+
+    color: #333333;
+
+    padding: 7px 14px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.watchlist-charts-button:hover {
+    background: #f5f5f5;
+
+    border-color: #bdbdbd;
+}
+
+
+/* =====================================================
+   FULL SCREEN CHART VIEW
+   ===================================================== */
+
+/*
+ * The chart screen is completely independent from
+ * the normal page.
+ *
+ * It always occupies exactly the browser viewport.
+ */
+
+.watchlist-charts-overlay {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    z-index: 99999;
+
+    background: #ffffff;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   TOP BAR
+   ===================================================== */
+
+.watchlist-charts-topbar {
+    flex: 0 0 56px;
+
+    width: 100%;
+
+    height: 56px;
+
+    min-height: 56px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 0 18px;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    background: #ffffff;
+
+    box-sizing: border-box;
+}
+
+
+.watchlist-charts-back {
+    border: none;
+
+    background: transparent;
+
+    color: #333333;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    padding: 7px 10px;
+
+    border-radius: 5px;
+}
+
+
+.watchlist-charts-back:hover {
+    background: #f3f3f3;
+}
+
+
+.watchlist-chart-title {
+    font-size: 17px;
+
+    font-weight: 700;
+
+    color: #222222;
+}
+
+
+/* =====================================================
+   MAIN CHARTS AREA
+   ===================================================== */
+
+/*
+ * IMPORTANT:
+ *
+ * The main area gets the exact remaining viewport
+ * height after the 56px top bar.
+ *
+ * Nothing is allowed to increase this height.
+ */
+
+.watchlist-charts-main {
+    flex: 0 0 calc(100vh - 56px);
+
+    width: 100%;
+
+    height: calc(100vh - 56px);
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        340px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   CHART PANEL
+   ===================================================== */
+
+.watchlist-chart-panel {
+    position: relative;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    padding: 16px;
+
+    background: #f8f9fa;
+
+    border-right: 1px solid #e5e5e5;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   CHART BOX
+   ===================================================== */
+
+/*
+ * This is the actual box containing Lightweight Charts.
+ *
+ * It is deliberately NOT position:absolute.
+ *
+ * The box is constrained by the chart panel.
+ */
+
+.watchlist-chart {
+    position: relative;
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    background: #ffffff;
+
+    border: 1px solid #dcdfe3;
+
+    border-radius: 6px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   EMPTY CHART STATE
+   ===================================================== */
+
+.watchlist-chart-empty {
+    position: absolute;
+
+    top: 17px;
+    right: 17px;
+    bottom: 17px;
+    left: 17px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    pointer-events: none;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+
+.watchlist-chart-empty-title {
+    font-size: 20px;
+
+    font-weight: 600;
+
+    color: #444444;
+
+    margin-bottom: 7px;
+}
+
+
+.watchlist-chart-empty-text {
+    font-size: 13px;
+
+    color: #888888;
+}
+
+
+/* =====================================================
+   RIGHT WATCHLIST PANEL
+   ===================================================== */
+
+.watchlist-chart-side {
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background: #ffffff;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   RIGHT WATCHLIST HEADER
+   ===================================================== */
+
+.watchlist-chart-side-header {
+    flex: 0 0 42px;
+
+    width: 100%;
+
+    height: 42px;
+
+    min-height: 42px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(110px, 1fr)
+        90px
+        100px;
+
+    align-items: center;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    color: #888888;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    box-sizing: border-box;
+}
+
+
+.watchlist-chart-side-header span:nth-child(2),
+.watchlist-chart-side-header span:nth-child(3) {
+    text-align: right;
+}
+
+
+/* =====================================================
+   RIGHT WATCHLIST BODY
+   ===================================================== */
+
+.watchlist-chart-side-body {
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   CHART WATCHLIST ROW
+   ===================================================== */
+
+.watchlist-chart-row {
+    min-height: 52px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(110px, 1fr)
+        90px
+        100px;
+
+    align-items: center;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #f0f0f0;
+
+    cursor: pointer;
+
+    transition:
+        background 0.1s ease;
+
+    box-sizing: border-box;
+}
+
+
+.watchlist-chart-row:hover {
+    background: #f5f5f5;
+}
+
+
+.watchlist-chart-row.selected {
+    background: #eeeeee;
+}
+
+
+.chart-symbol {
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #222222;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+.chart-change,
+.chart-price {
+    text-align: right;
+
+    font-size: 12px;
+}
+
+
+.chart-price {
+    color: #333333;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+.chart-change {
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* =====================================================
+   EMPTY WATCHLIST
+   ===================================================== */
+
+.watchlist-chart-side-body:empty::before {
+    content:
+        "No symbols in this watchlist.";
+
+    display: block;
+
+    padding: 30px 15px;
+
+    text-align: center;
+
+    color: #888888;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   CHART ERROR
+   ===================================================== */
+
+.watchlist-chart-error {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #888888;
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   CHART SCREEN RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 800px) {
+
+    .watchlist-charts-main {
+        grid-template-columns:
+            minmax(0, 1fr)
+            280px;
+    }
+
+
+    .watchlist-chart-side-header,
+    .watchlist-chart-row {
+        grid-template-columns:
+            minmax(80px, 1fr)
+            70px
+            85px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .watchlist-charts-main {
+        grid-template-columns:
+            1fr;
+
+        grid-template-rows:
+            minmax(0, 1fr)
+            220px;
+    }
+
+
+    .watchlist-chart-panel {
+        border-right: none;
+
+        border-bottom:
+            1px solid #e5e5e5;
     }
 
 }

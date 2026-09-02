@@ -1680,17 +1680,78 @@ export function renderWatchlists(
     }
 
 
-    listHeader.appendChild(
-        listTitle
+   // =====================================================
+// HEADER ACTIONS
+// =====================================================
+
+const headerActions =
+    document.createElement(
+        "div"
     );
 
-    listHeader.appendChild(
-        listInfo
+headerActions.className =
+    "watchlist-header-actions";
+
+
+// =====================================================
+// CHARTS BUTTON
+// =====================================================
+
+const chartsButton =
+    document.createElement(
+        "button"
     );
 
-    listHeader.appendChild(
-        addSymbolButton
-    );
+chartsButton.type =
+    "button";
+
+chartsButton.className =
+    "watchlist-charts-button";
+
+chartsButton.textContent =
+    "Charts";
+
+chartsButton.title =
+    "Open charts";
+
+chartsButton.addEventListener(
+    "click",
+    event => {
+
+        event.stopPropagation();
+
+        openChartsView(
+            companies
+        );
+
+    }
+);
+
+
+// =====================================================
+// ADD BUTTON
+// =====================================================
+
+headerActions.appendChild(
+    addSymbolButton
+);
+
+headerActions.appendChild(
+    chartsButton
+);
+
+
+listHeader.appendChild(
+    listTitle
+);
+
+listHeader.appendChild(
+    listInfo
+);
+
+listHeader.appendChild(
+    headerActions
+);
 
 
     container.appendChild(
@@ -1776,7 +1837,36 @@ export function renderWatchlists(
             row.className =
                 "watchlist-row";
 
+            row.addEventListener(
+    "click",
+    event => {
 
+        // Do not open chart when
+        // delete button is clicked.
+
+        if (
+            event.target.closest(
+                ".watchlist-delete-symbol"
+            )
+        ) {
+            return;
+        }
+
+        // Charts view must already be open
+        // before selecting a stock.
+
+        if (
+            chartsViewOpen
+        ) {
+
+            selectChartSymbol(
+                symbol
+            );
+
+        }
+
+    }
+);
             // =================================================
             // SYMBOL
             // =================================================
@@ -2015,4 +2105,1075 @@ export function getWatchlistSymbols() {
     return list
         ? [...list.symbols]
         : [];
+}
+
+// =========================================================
+// CHART VIEW STATE
+// =========================================================
+
+let chartsViewOpen =
+    false;
+
+let chart =
+    null;
+
+let candlestickSeries =
+    null;
+
+let selectedChartSymbol =
+    null;
+
+let chartRequestId =
+    0;
+
+
+// =========================================================
+// OPEN CHARTS VIEW
+// =========================================================
+
+function openChartsView(
+    companies
+) {
+
+    chartsViewOpen =
+        true;
+
+    document.body.style.overflow =
+    "hidden";
+
+    selectedChartSymbol =
+        null;
+
+
+    // Remove existing chart view
+    // if one somehow already exists.
+
+    const existing =
+        document.getElementById(
+            "watchlistChartsOverlay"
+        );
+
+    if (
+        existing
+    ) {
+        existing.remove();
+    }
+
+
+    // =====================================================
+    // OVERLAY
+    // =====================================================
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+    overlay.id =
+        "watchlistChartsOverlay";
+
+    overlay.className =
+        "watchlist-charts-overlay";
+
+
+    // =====================================================
+    // TOP BAR
+    // =====================================================
+
+    const topBar =
+        document.createElement(
+            "div"
+        );
+
+    topBar.className =
+        "watchlist-charts-topbar";
+
+
+    const backButton =
+        document.createElement(
+            "button"
+        );
+
+    backButton.type =
+        "button";
+
+    backButton.className =
+        "watchlist-charts-back";
+
+    backButton.textContent =
+        "← Back";
+
+    backButton.addEventListener(
+        "click",
+        closeChartsView
+    );
+
+
+    const chartTitle =
+        document.createElement(
+            "div"
+        );
+
+    chartTitle.id =
+        "watchlistChartTitle";
+
+    chartTitle.className =
+        "watchlist-chart-title";
+
+    chartTitle.textContent =
+        "Select a stock";
+
+
+    topBar.appendChild(
+        backButton
+    );
+
+    topBar.appendChild(
+        chartTitle
+    );
+
+
+    // =====================================================
+    // MAIN AREA
+    // =====================================================
+
+    const main =
+        document.createElement(
+            "div"
+        );
+
+    main.className =
+        "watchlist-charts-main";
+
+
+    // =====================================================
+    // CHART AREA
+    // =====================================================
+
+    const chartPanel =
+        document.createElement(
+            "div"
+        );
+
+    chartPanel.className =
+        "watchlist-chart-panel";
+
+
+    const chartContainer =
+        document.createElement(
+            "div"
+        );
+
+    chartContainer.id =
+        "watchlistChart";
+
+    chartContainer.className =
+        "watchlist-chart";
+
+
+    const emptyState =
+        document.createElement(
+            "div"
+        );
+
+    emptyState.id =
+        "watchlistChartEmpty";
+
+    emptyState.className =
+        "watchlist-chart-empty";
+
+    emptyState.innerHTML = `
+        <div class="watchlist-chart-empty-title">
+            Select a stock
+        </div>
+
+        <div class="watchlist-chart-empty-text">
+            Click a symbol from your watchlist
+            to view its chart.
+        </div>
+    `;
+
+
+    chartPanel.appendChild(
+        chartContainer
+    );
+
+    chartPanel.appendChild(
+        emptyState
+    );
+
+
+    // =====================================================
+    // RIGHT WATCHLIST PANEL
+    // =====================================================
+
+    const sidePanel =
+        document.createElement(
+            "div"
+        );
+
+    sidePanel.className =
+        "watchlist-chart-side";
+
+
+    const sideHeader =
+        document.createElement(
+            "div"
+        );
+
+    sideHeader.className =
+        "watchlist-chart-side-header";
+
+    sideHeader.innerHTML = `
+        <span>Symbol</span>
+        <span>Change</span>
+        <span>Price</span>
+    `;
+
+
+    const sideBody =
+        document.createElement(
+            "div"
+        );
+
+    sideBody.id =
+        "watchlistChartSideBody";
+
+    sideBody.className =
+        "watchlist-chart-side-body";
+
+
+    sidePanel.appendChild(
+        sideHeader
+    );
+
+    sidePanel.appendChild(
+        sideBody
+    );
+
+
+    main.appendChild(
+        chartPanel
+    );
+
+    main.appendChild(
+        sidePanel
+    );
+
+
+    overlay.appendChild(
+        topBar
+    );
+
+    overlay.appendChild(
+        main
+    );
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    // =====================================================
+    // RENDER CURRENT WATCHLIST
+    // =====================================================
+
+    renderChartsWatchlist(
+        companies
+    );
+
+
+    // =====================================================
+    // CREATE CHART
+    // =====================================================
+
+    createChart();
+
+
+    // =====================================================
+    // ESCAPE KEY
+    // =====================================================
+
+    document.addEventListener(
+        "keydown",
+        handleChartsEscape
+    );
+
+}
+
+
+// =========================================================
+// CLOSE CHARTS VIEW
+// =========================================================
+
+function closeChartsView() {
+
+    chartsViewOpen =
+        false;
+
+    selectedChartSymbol =
+        null;
+
+
+    chartRequestId++;
+
+
+    document.removeEventListener(
+        "keydown",
+        handleChartsEscape
+    );
+
+
+    if (
+        chart
+    ) {
+
+        chart.remove();
+
+        chart =
+            null;
+
+        candlestickSeries =
+            null;
+
+    }
+
+
+    const overlay =
+        document.getElementById(
+            "watchlistChartsOverlay"
+        );
+
+    if (
+        overlay
+    ) {
+
+        overlay.remove();
+
+    }
+
+    document.body.style.overflow =
+    "";
+
+}
+
+
+// =========================================================
+// ESCAPE
+// =========================================================
+
+function handleChartsEscape(
+    event
+) {
+
+    if (
+        event.key ===
+        "Escape"
+    ) {
+
+        closeChartsView();
+
+    }
+
+}
+
+
+// =========================================================
+// CREATE CHART
+// =========================================================
+
+function createChart() {
+
+    const container =
+        document.getElementById(
+            "watchlistChart"
+        );
+
+    if (
+        !container ||
+        !window.LightweightCharts
+    ) {
+
+        return;
+
+    }
+
+
+    chart =
+        LightweightCharts.createChart(
+            container,
+            {
+                layout: {
+                    background: {
+                        type: "solid",
+                        color: "#ffffff"
+                    },
+
+                    textColor:
+                        "#333333"
+                },
+
+                grid: {
+                    vertLines: {
+                        color: "#eeeeee"
+                    },
+
+                    horzLines: {
+                        color: "#eeeeee"
+                    }
+                },
+
+                crosshair: {
+                    mode:
+                        LightweightCharts.CrosshairMode
+                            .Normal
+                },
+
+                rightPriceScale: {
+                    borderColor:
+                        "#dddddd"
+                },
+
+                timeScale: {
+                    borderColor:
+                        "#dddddd",
+
+                    timeVisible:
+                        true,
+
+                    secondsVisible:
+                        false
+                },
+
+                handleScroll: {
+                    mouseWheel:
+                        true,
+
+                    pressedMouseMove:
+                        true
+                },
+
+                handleScale: {
+                    mouseWheel:
+                        true,
+
+                    pinch:
+                        true
+                }
+            }
+        );
+
+
+    candlestickSeries =
+        chart.addSeries(
+            LightweightCharts.CandlestickSeries,
+            {
+                upColor:
+                    "#26a69a",
+
+                downColor:
+                    "#ef5350",
+
+                borderUpColor:
+                    "#26a69a",
+
+                borderDownColor:
+                    "#ef5350",
+
+                wickUpColor:
+                    "#26a69a",
+
+                wickDownColor:
+                    "#ef5350"
+            }
+        );
+
+
+    // Resize chart when the
+    // browser window changes size.
+
+    window.addEventListener(
+        "resize",
+        resizeChart
+    );
+
+    resizeChart();
+
+}
+
+
+// =========================================================
+// RESIZE CHART
+// =========================================================
+
+function resizeChart() {
+
+    if (
+        !chart
+    ) {
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            "watchlistChart"
+        );
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    chart.applyOptions(
+        {
+            width:
+                container.clientWidth,
+
+            height:
+                container.clientHeight
+        }
+    );
+
+}
+
+
+// =========================================================
+// RENDER CHART WATCHLIST
+// =========================================================
+
+function renderChartsWatchlist(
+    companies
+) {
+
+    const body =
+        document.getElementById(
+            "watchlistChartSideBody"
+        );
+
+    if (
+        !body
+    ) {
+
+        return;
+
+    }
+
+
+    body.innerHTML =
+        "";
+
+
+    const symbols =
+        getWatchlistSymbols();
+
+
+    symbols.forEach(
+        symbol => {
+
+            const company =
+                companies.find(
+                    item =>
+                        item.nseSymbol ===
+                        symbol
+                );
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+            row.className =
+                "watchlist-chart-row";
+
+
+            row.dataset.symbol =
+                symbol;
+
+
+            // =================================================
+            // SYMBOL
+            // =================================================
+
+            const symbolElement =
+                document.createElement(
+                    "div"
+                );
+
+            symbolElement.className =
+                "chart-symbol";
+
+            symbolElement.textContent =
+                symbol;
+
+
+            // =================================================
+            // CHANGE
+            // =================================================
+
+            const changeElement =
+                document.createElement(
+                    "div"
+                );
+
+            changeElement.className =
+                "chart-change";
+
+
+            if (
+                company &&
+                company.changePercent !== null &&
+                company.changePercent !== undefined
+            ) {
+
+                const change =
+                    Number(
+                        company.changePercent
+                    );
+
+
+                changeElement.textContent =
+                    (change > 0
+                        ? "+"
+                        : "") +
+                    change.toFixed(2) +
+                    "%";
+
+
+                if (
+                    change > 0
+                ) {
+
+                    changeElement.classList.add(
+                        "watchlist-positive"
+                    );
+
+                } else if (
+                    change < 0
+                ) {
+
+                    changeElement.classList.add(
+                        "watchlist-negative"
+                    );
+
+                } else {
+
+                    changeElement.classList.add(
+                        "watchlist-neutral"
+                    );
+
+                }
+
+            } else {
+
+                changeElement.textContent =
+                    "—";
+
+            }
+
+
+            // =================================================
+            // PRICE
+            // =================================================
+
+            const priceElement =
+                document.createElement(
+                    "div"
+                );
+
+            priceElement.className =
+                "chart-price";
+
+
+            if (
+                company &&
+                company.livePrice !== null &&
+                company.livePrice !== undefined
+            ) {
+
+                priceElement.textContent =
+                    "₹" +
+                    Number(
+                        company.livePrice
+                    ).toLocaleString(
+                        "en-IN",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+            } else {
+
+                priceElement.textContent =
+                    "—";
+
+            }
+
+
+            row.appendChild(
+                symbolElement
+            );
+
+            row.appendChild(
+                changeElement
+            );
+
+            row.appendChild(
+                priceElement
+            );
+
+
+            row.addEventListener(
+                "click",
+                () => {
+
+                    selectChartSymbol(
+                        symbol
+                    );
+
+                }
+            );
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// SELECT CHART SYMBOL
+// =========================================================
+
+// =========================================================
+// SELECT CHART SYMBOL
+// =========================================================
+
+async function selectChartSymbol(
+    symbol
+) {
+
+    if (
+        !chartsViewOpen
+    ) {
+
+        return;
+
+    }
+
+
+    selectedChartSymbol =
+        symbol;
+
+
+    // =====================================================
+    // HIGHLIGHT SELECTED ROW
+    // =====================================================
+
+    document
+        .querySelectorAll(
+            ".watchlist-chart-row"
+        )
+        .forEach(
+            row => {
+
+                row.classList.toggle(
+                    "selected",
+                    row.dataset.symbol ===
+                        symbol
+                );
+
+            }
+        );
+
+
+    // =====================================================
+    // UPDATE TITLE
+    // =====================================================
+
+    const title =
+        document.getElementById(
+            "watchlistChartTitle"
+        );
+
+
+    if (
+        title
+    ) {
+
+        title.textContent =
+            symbol;
+
+    }
+
+
+    // =====================================================
+    // HIDE EMPTY STATE
+    // =====================================================
+
+    const emptyState =
+        document.getElementById(
+            "watchlistChartEmpty"
+        );
+
+
+    if (
+        emptyState
+    ) {
+
+        emptyState.style.display =
+            "none";
+
+    }
+
+
+    // =====================================================
+    // REQUEST ID
+    // =====================================================
+
+    const requestId =
+        ++chartRequestId;
+
+
+    // =====================================================
+    // REMOVE PREVIOUS CHART
+    // =====================================================
+
+    if (
+        chart
+    ) {
+
+        chart.remove();
+
+        chart =
+            null;
+
+        candlestickSeries =
+            null;
+
+    }
+
+
+    const chartContainer =
+        document.getElementById(
+            "watchlistChart"
+        );
+
+
+    if (
+        !chartContainer
+    ) {
+
+        return;
+
+    }
+
+
+    chartContainer.innerHTML =
+        "";
+
+
+    // =====================================================
+    // CREATE NEW EMPTY CHART
+    // =====================================================
+
+    createChart();
+
+
+    // =====================================================
+    // FETCH HISTORICAL DATA
+    // =====================================================
+
+    try {
+
+        const response =
+            await fetch(
+                `/companies/${encodeURIComponent(
+                    symbol
+                )}/candles`
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+
+        }
+
+
+        const candles =
+            await response.json();
+
+
+        // =================================================
+        // IGNORE OLD REQUEST
+        // =================================================
+
+        if (
+            requestId !==
+            chartRequestId ||
+            selectedChartSymbol !==
+                symbol
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !Array.isArray(candles) ||
+            candles.length === 0
+        ) {
+
+            throw new Error(
+                "No historical candle data available."
+            );
+
+        }
+
+
+        // =================================================
+        // CONVERT DATA
+        // =================================================
+
+        const chartData =
+            candles
+                .map(
+                    candle => {
+
+                        return {
+
+                            time:
+                                candle.time,
+
+                            open:
+                                Number(
+                                    candle.open
+                                ),
+
+                            high:
+                                Number(
+                                    candle.high
+                                ),
+
+                            low:
+                                Number(
+                                    candle.low
+                                ),
+
+                            close:
+                                Number(
+                                    candle.close
+                                )
+
+                        };
+
+                    }
+                )
+                .filter(
+                    candle =>
+
+                        Number.isFinite(
+                            candle.open
+                        ) &&
+
+                        Number.isFinite(
+                            candle.high
+                        ) &&
+
+                        Number.isFinite(
+                            candle.low
+                        ) &&
+
+                        Number.isFinite(
+                            candle.close
+                        )
+                );
+
+
+        // =================================================
+        // DISPLAY CANDLES
+        // =================================================
+
+        if (
+            !candlestickSeries
+        ) {
+
+            throw new Error(
+                "Chart could not be initialized."
+            );
+
+        }
+
+
+        candlestickSeries.setData(
+            chartData
+        );
+
+
+        chart.timeScale()
+            .fitContent();
+
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "Failed to load chart:",
+            error
+        );
+
+
+        // Ignore errors from
+        // an older request.
+
+        if (
+            requestId !==
+            chartRequestId
+        ) {
+
+            return;
+
+        }
+
+
+        const container =
+            document.getElementById(
+                "watchlistChart"
+            );
+
+
+        if (
+            container
+        ) {
+
+            container.innerHTML = `
+                <div class="watchlist-chart-error">
+                    Unable to load chart data.
+                </div>
+            `;
+
+        }
+
+    }
+
 }
