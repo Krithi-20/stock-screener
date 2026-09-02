@@ -447,3 +447,320 @@
     }
 
 }
+
+/* =====================================================
+   ADD TO WATCHLIST POPOVER
+   ===================================================== */
+
+.watchlist-picker {
+    position: fixed;
+
+    min-width: 220px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    box-shadow:
+        0 6px 18px rgba(
+            0,
+            0,
+            0,
+            0.12
+        );
+
+    padding: 10px;
+
+    z-index: 1000;
+}
+
+
+.watchlist-picker-title {
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #374151;
+
+    padding: 4px 6px 8px;
+}
+
+
+.watchlist-picker-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+
+    max-height: 220px;
+
+    overflow-y: auto;
+}
+
+
+/* =====================================================
+   WATCHLIST PICKER OPTION
+   ===================================================== */
+
+.watchlist-picker-option {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 8px 7px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.watchlist-picker-option:hover {
+    background: #f3f4f6;
+}
+
+
+.watchlist-picker-option input {
+    width: 14px;
+    height: 14px;
+
+    margin: 0;
+
+    cursor: pointer;
+}
+
+
+.watchlist-picker-option-info {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    min-width: 0;
+}
+
+
+.watchlist-picker-option-name {
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #374151;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.watchlist-picker-option-count {
+    font-size: 11px;
+
+    color: #9ca3af;
+}
+
+
+/* =====================================================
+   FULL WATCHLIST
+   ===================================================== */
+
+.watchlist-picker-option.full {
+    cursor: default;
+
+    opacity: 0.55;
+}
+
+
+.watchlist-picker-option.full:hover {
+    background: transparent;
+}
+
+
+.watchlist-picker-option.full input {
+    cursor: default;
+}
+
+
+.watchlist-picker-full {
+    margin-left: auto;
+
+    font-size: 10px;
+
+    color: #9ca3af;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   PICKER ACTIONS
+   ===================================================== */
+
+.watchlist-picker-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    margin-top: 8px;
+
+    padding-top: 8px;
+
+    border-top: 1px solid #eef0f2;
+}
+
+
+.watchlist-picker-cancel,
+.watchlist-picker-add {
+    border: none;
+
+    border-radius: 6px;
+
+    padding: 7px 11px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.watchlist-picker-cancel {
+    background: #f3f4f6;
+
+    color: #4b5563;
+}
+
+
+.watchlist-picker-cancel:hover {
+    background: #e5e7eb;
+}
+
+
+.watchlist-picker-add {
+    background: #111827;
+
+    color: white;
+}
+
+
+.watchlist-picker-add:hover {
+    background: #374151;
+}
+
+
+.watchlist-picker-add:disabled {
+    background: #d1d5db;
+
+    cursor: default;
+}
+
+
+/* =====================================================
+   WATCHLIST NOTIFICATION
+   ===================================================== */
+
+.watchlist-notification {
+    position: fixed;
+
+    top: 20px;
+    right: 20px;
+
+    min-width: 240px;
+    max-width: 340px;
+
+    padding: 12px 15px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 5px 18px rgba(
+            0,
+            0,
+            0,
+            0.12
+        );
+
+    z-index: 2000;
+
+    font-size: 13px;
+
+    color: #374151;
+}
+
+
+.watchlist-notification-title {
+    font-weight: 700;
+
+    color: #111827;
+
+    margin-bottom: 3px;
+}
+
+
+.watchlist-notification-message {
+    color: #6b7280;
+
+    line-height: 1.4;
+}
+
+
+/* =====================================================
+   WATCHLIST WARNING
+   ===================================================== */
+
+.watchlist-notification.warning {
+    border-left: 3px solid #9ca3af;
+}
+
+
+/* =====================================================
+   WATCHLIST SUCCESS
+   ===================================================== */
+
+.watchlist-notification.success {
+    border-left: 3px solid #6b7280;
+}
+
+
+/* =====================================================
+   RESPONSIVE PICKER
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .watchlist-picker {
+        min-width: 200px;
+
+        max-width: calc(
+            100vw - 30px
+        );
+    }
+
+
+    .watchlist-notification {
+        left: 15px;
+        right: 15px;
+
+        top: 15px;
+
+        max-width: none;
+    }
+
+}

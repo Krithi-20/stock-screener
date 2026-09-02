@@ -298,39 +298,46 @@ function addSymbolToWatchlist(
     }
 
 
+    // =====================================================
+    // DUPLICATE
+    // =====================================================
+
+    // If the symbol already exists,
+    // simply skip it.
+    //
+    // IMPORTANT:
+    // Do NOT show an alert.
+    // The user should not have to manually
+    // remove duplicates.
+
     if (
         list.symbols.includes(
             symbol
         )
     ) {
 
-        alert(
-            `${symbol} is already in "${list.name}".`
-        );
-
         return false;
+
     }
 
+
+    // =====================================================
+    // MAXIMUM 40 SYMBOLS
+    // =====================================================
 
     if (
         list.symbols.length >=
         MAX_SYMBOLS
     ) {
 
-        alert(
-            `"${list.name}" already contains 40 symbols.`
-        );
-
         return false;
+
     }
 
 
     list.symbols.push(
         symbol
     );
-
-
-    saveWatchlists();
 
 
     return true;
@@ -375,86 +382,856 @@ function removeSymbolFromWatchlist(
 // ASK WHICH WATCHLIST
 // =========================================================
 
+// =========================================================
+// ADD SELECTED SYMBOLS FROM TABLE
+// =========================================================
+
+// =========================================================
+// ADD SELECTED SYMBOLS FROM TABLE
+// =========================================================
+
 export function addSymbolFromTable(
-    symbol
+    symbols,
+    anchorButton
 ) {
+
+    // =====================================================
+    // NORMALIZE INPUT
+    // =====================================================
+
+    if (
+        !Array.isArray(symbols)
+    ) {
+
+        symbols = [
+            symbols
+        ];
+
+    }
+
+
+    symbols =
+        [...new Set(
+            symbols.filter(
+                symbol =>
+                    symbol !== null &&
+                    symbol !== undefined &&
+                    symbol.trim().length > 0
+            )
+        )];
+
+
+    if (
+        symbols.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // NO WATCHLISTS
+    // =====================================================
 
     if (
         watchlists.length === 0
     ) {
 
-        alert(
-            "Create a watchlist first."
+        showWatchlistNotification(
+            "No watchlists",
+            "Create a watchlist first.",
+            "warning"
         );
 
         return;
+
     }
 
 
-    const availableLists =
-        watchlists
-            .map(
-                (list, index) =>
-                    `${index + 1}. ${list.name} (${list.symbols.length}/40)`
-            )
-            .join("\n");
+    // =====================================================
+    // REMOVE EXISTING PICKER
+    // =====================================================
+
+    closeWatchlistPicker();
 
 
-    const answer =
-        prompt(
-            `Add ${symbol} to which watchlist?\n\n${availableLists}\n\nEnter the list number:`
+    // =====================================================
+    // CREATE PICKER
+    // =====================================================
+
+    const picker =
+        document.createElement(
+            "div"
         );
 
 
-    if (
-        answer === null
-    ) {
-
-        return;
-    }
+    picker.className =
+        "watchlist-picker";
 
 
-    const selected =
-        Number(
-            answer.trim()
+    // =====================================================
+    // TITLE
+    // =====================================================
+
+    const title =
+        document.createElement(
+            "div"
         );
 
 
-    if (
-        !Number.isInteger(
-            selected
-        ) ||
-        selected < 1 ||
-        selected > watchlists.length
-    ) {
+    title.className =
+        "watchlist-picker-title";
 
-        alert(
-            "Invalid watchlist number."
+
+    title.textContent =
+        `Add ${symbols.length} ${
+            symbols.length === 1
+                ? "company"
+                : "companies"
+        } to:`;
+
+
+    picker.appendChild(
+        title
+    );
+
+
+    // =====================================================
+    // LIST OPTIONS
+    // =====================================================
+
+    const listContainer =
+        document.createElement(
+            "div"
         );
 
-        return;
-    }
+
+    listContainer.className =
+        "watchlist-picker-list";
 
 
-    const index =
-        selected - 1;
+    watchlists.forEach(
+        (list, index) => {
+
+            const option =
+                document.createElement(
+                    "label"
+                );
 
 
-    if (
-        addSymbolToWatchlist(
-            index,
-            symbol
-        )
-    ) {
+            option.className =
+                "watchlist-picker-option";
 
-        alert(
-            `${symbol} added to "${watchlists[index].name}".`
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+
+            checkbox.type =
+                "checkbox";
+
+
+            checkbox.value =
+                index;
+
+
+            // Disable completely full lists
+
+            if (
+                list.symbols.length >=
+                MAX_SYMBOLS
+            ) {
+
+                option.classList.add(
+                    "full"
+                );
+
+                checkbox.disabled =
+                    true;
+
+            }
+
+
+            const info =
+                document.createElement(
+                    "div"
+                );
+
+
+            info.className =
+                "watchlist-picker-option-info";
+
+
+            const name =
+                document.createElement(
+                    "div"
+                );
+
+
+            name.className =
+                "watchlist-picker-option-name";
+
+
+            name.textContent =
+                list.name;
+
+
+            const count =
+                document.createElement(
+                    "div"
+                );
+
+
+            count.className =
+                "watchlist-picker-option-count";
+
+
+            count.textContent =
+                `${list.symbols.length}/40`;
+
+
+            info.appendChild(
+                name
+            );
+
+            info.appendChild(
+                count
+            );
+
+
+            option.appendChild(
+                checkbox
+            );
+
+            option.appendChild(
+                info
+            );
+
+
+            if (
+                list.symbols.length >=
+                MAX_SYMBOLS
+            ) {
+
+                const full =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                full.className =
+                    "watchlist-picker-full";
+
+
+                full.textContent =
+                    "Full";
+
+
+                option.appendChild(
+                    full
+                );
+
+            }
+
+
+            listContainer.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    picker.appendChild(
+        listContainer
+    );
+
+
+    // =====================================================
+    // ACTIONS
+    // =====================================================
+
+    const actions =
+        document.createElement(
+            "div"
         );
 
-    }
+
+    actions.className =
+        "watchlist-picker-actions";
+
+
+    const cancelButton =
+        document.createElement(
+            "button"
+        );
+
+
+    cancelButton.type =
+        "button";
+
+
+    cancelButton.className =
+        "watchlist-picker-cancel";
+
+
+    cancelButton.textContent =
+        "Cancel";
+
+
+    cancelButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            closeWatchlistPicker();
+
+        }
+    );
+
+
+    const addButton =
+        document.createElement(
+            "button"
+        );
+
+
+    addButton.type =
+        "button";
+
+
+    addButton.className =
+        "watchlist-picker-add";
+
+
+    addButton.textContent =
+        "Add";
+
+
+    addButton.disabled =
+        true;
+
+
+    // =====================================================
+    // ENABLE ADD BUTTON WHEN A LIST IS CHECKED
+    // =====================================================
+
+    const checkboxes =
+        listContainer.querySelectorAll(
+            'input[type="checkbox"]'
+        );
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+                    const selectedLists =
+                        listContainer.querySelectorAll(
+                            'input[type="checkbox"]:checked'
+                        );
+
+
+                    addButton.disabled =
+                        selectedLists.length === 0;
+
+                }
+            );
+
+        }
+    );
+
+
+    // =====================================================
+    // ADD BUTTON
+    // =====================================================
+
+    addButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            const selectedLists =
+                [...listContainer.querySelectorAll(
+                    'input[type="checkbox"]:checked'
+                )];
+
+
+            if (
+                selectedLists.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            const results = [];
+
+
+            selectedLists.forEach(
+                checkbox => {
+
+                    const index =
+                        Number(
+                            checkbox.value
+                        );
+
+
+                    const list =
+                        watchlists[index];
+
+
+                    if (!list) {
+                        return;
+                    }
+
+
+                    let addedCount =
+                        0;
+
+                    let duplicateCount =
+                        0;
+
+                    let fullCount =
+                        0;
+
+
+                    symbols.forEach(
+                        symbol => {
+
+                            // =================================
+                            // DUPLICATE
+                            // =================================
+
+                            if (
+                                list.symbols.includes(
+                                    symbol
+                                )
+                            ) {
+
+                                duplicateCount++;
+
+                                return;
+
+                            }
+
+
+                            // =================================
+                            // LIST FULL
+                            // =================================
+
+                            if (
+                                list.symbols.length >=
+                                MAX_SYMBOLS
+                            ) {
+
+                                fullCount++;
+
+                                return;
+
+                            }
+
+
+                            list.symbols.push(
+                                symbol
+                            );
+
+
+                            addedCount++;
+
+                        }
+                    );
+
+
+                    results.push(
+                        {
+                            name:
+                                list.name,
+
+                            added:
+                                addedCount,
+
+                            duplicates:
+                                duplicateCount,
+
+                            full:
+                                fullCount,
+
+                            total:
+                                list.symbols.length
+                        }
+                    );
+
+                }
+            );
+
+
+            // =================================================
+            // SAVE ONCE
+            // =================================================
+
+            saveWatchlists();
+
+
+            // =================================================
+            // CLOSE PICKER
+            // =================================================
+
+            closeWatchlistPicker();
+
+
+            // =================================================
+            // REFRESH WATCHLIST
+            // =================================================
+
+            renderWatchlists();
+
+
+            // =================================================
+            // SHOW RESULT
+            // =================================================
+
+            results.forEach(
+                result => {
+
+                    if (
+                        result.added > 0
+                    ) {
+
+                        let message =
+                            `${result.added} ${
+                                result.added === 1
+                                    ? "company"
+                                    : "companies"
+                            } moved to "${result.name}" — ${
+                                result.total
+                            }/40`;
+
+
+                        if (
+                            result.duplicates > 0
+                        ) {
+
+                            message +=
+                                ` · ${
+                                    result.duplicates
+                                } already existed`;
+
+                        }
+
+
+                        showWatchlistNotification(
+                            "Companies added",
+                            message,
+                            "success"
+                        );
+
+                    } else if (
+                        result.full > 0
+                    ) {
+
+                        showWatchlistNotification(
+                            "Watchlist full",
+                            `"${result.name}" is full — 40/40`,
+                            "warning"
+                        );
+
+                    } else if (
+                        result.duplicates > 0
+                    ) {
+
+                        showWatchlistNotification(
+                            "Already in watchlist",
+                            `All selected companies already exist in "${result.name}" — ${result.total}/40`,
+                            "warning"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    actions.appendChild(
+        cancelButton
+    );
+
+    actions.appendChild(
+        addButton
+    );
+
+
+    picker.appendChild(
+        actions
+    );
+
+
+    document.body.appendChild(
+        picker
+    );
+
+
+    // =====================================================
+    // POSITION BESIDE BUTTON
+    // =====================================================
+
+    positionWatchlistPicker(
+        picker,
+        anchorButton
+    );
+
+
+    // =====================================================
+    // CLOSE WHEN CLICKING OUTSIDE
+    // =====================================================
+
+    setTimeout(
+        () => {
+
+            document.addEventListener(
+                "click",
+                handleWatchlistOutsideClick
+            );
+
+        },
+        0
+    );
 
 }
 
+// =========================================================
+// WATCHLIST PICKER STATE
+// =========================================================
+
+let activeWatchlistPicker =
+    null;
+
+
+// =========================================================
+// CLOSE WATCHLIST PICKER
+// =========================================================
+
+function closeWatchlistPicker() {
+
+    if (
+        activeWatchlistPicker
+    ) {
+
+        activeWatchlistPicker.remove();
+
+        activeWatchlistPicker =
+            null;
+
+    }
+
+
+    document.removeEventListener(
+        "click",
+        handleWatchlistOutsideClick
+    );
+
+}
+
+// =========================================================
+// OUTSIDE CLICK
+// =========================================================
+
+function handleWatchlistOutsideClick(
+    event
+) {
+
+    if (
+        !activeWatchlistPicker
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        activeWatchlistPicker.contains(
+            event.target
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    closeWatchlistPicker();
+
+}
+
+
+// =========================================================
+// POSITION PICKER
+// =========================================================
+
+function positionWatchlistPicker(
+    picker,
+    button
+) {
+
+    const rect =
+        button.getBoundingClientRect();
+
+
+    const pickerWidth =
+        240;
+
+
+    const pickerHeight =
+        250;
+
+
+    let left =
+        rect.right + 8;
+
+
+    let top =
+        rect.top;
+
+
+    // Prevent going outside right edge
+
+    if (
+        left + pickerWidth >
+        window.innerWidth - 10
+    ) {
+
+        left =
+            rect.left -
+            pickerWidth -
+            8;
+
+    }
+
+
+    // Prevent going below screen
+
+    if (
+        top + pickerHeight >
+        window.innerHeight - 10
+    ) {
+
+        top =
+            window.innerHeight -
+            pickerHeight -
+            10;
+
+    }
+
+
+    if (
+        top < 10
+    ) {
+
+        top = 10;
+
+    }
+
+
+    picker.style.left =
+        `${left}px`;
+
+    picker.style.top =
+        `${top}px`;
+
+
+    activeWatchlistPicker =
+        picker;
+
+}
+
+
+// =========================================================
+// WATCHLIST NOTIFICATION
+// =========================================================
+
+function showWatchlistNotification(
+    title,
+    message,
+    type
+) {
+
+    const notification =
+        document.createElement(
+            "div"
+        );
+
+
+    notification.className =
+        "watchlist-notification " +
+        type;
+
+
+    const titleElement =
+        document.createElement(
+            "div"
+        );
+
+
+    titleElement.className =
+        "watchlist-notification-title";
+
+
+    titleElement.textContent =
+        title;
+
+
+    const messageElement =
+        document.createElement(
+            "div"
+        );
+
+
+    messageElement.className =
+        "watchlist-notification-message";
+
+
+    messageElement.textContent =
+        message;
+
+
+    notification.appendChild(
+        titleElement
+    );
+
+    notification.appendChild(
+        messageElement
+    );
+
+
+    document.body.appendChild(
+        notification
+    );
+
+
+    setTimeout(
+        () => {
+
+            notification.remove();
+
+        },
+        3000
+    );
+
+}
 
 // =========================================================
 // MANUALLY ADD SYMBOL

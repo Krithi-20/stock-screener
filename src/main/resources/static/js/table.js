@@ -945,15 +945,39 @@ watchlistButton.className =
 watchlistButton.textContent =
     "+ List";
 
-
 watchlistButton.addEventListener(
     "click",
     event => {
 
         event.stopPropagation();
 
+
+        const symbols =
+            [...selectedSymbols];
+
+
+        // If nothing is selected,
+        // use the company whose button was clicked.
+
+        if (
+            symbols.length === 0
+        ) {
+
+            addSymbolFromTable(
+                [symbol],
+                watchlistButton
+            );
+
+            return;
+
+        }
+
+
+        // Use ALL selected companies
+
         addSymbolFromTable(
-            symbol
+            symbols,
+            watchlistButton
         );
 
     }
