@@ -635,6 +635,28 @@ tbody tr:hover {
     background: #f3f4f6 !important;
 }
 
+/* =====================================================
+   DAILY TOP MOVERS HIGHLIGHTS
+   ===================================================== */
+
+.daily-gainer-highlight {
+    background: #dff3e4 !important;
+}
+
+.daily-loser-highlight {
+    background: #f8dddd !important;
+}
+
+/*
+ * VISITED ALWAYS WINS
+ *
+ * The visited row is grey even if the
+ * stock previously crossed ±8%.
+ */
+.visited-row td.daily-gainer-highlight,
+.visited-row td.daily-loser-highlight {
+    background: #f3f4f6 !important;
+}
 
 .visited-row td {
     color: #9ca3af;

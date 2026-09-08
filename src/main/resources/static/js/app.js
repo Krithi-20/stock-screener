@@ -13,7 +13,8 @@ import {
 
 import {
     initializeWatchlists,
-    renderWatchlists
+    renderWatchlists,
+    updateChartsView
 } from "./watchlist.js";
 
 
@@ -47,13 +48,27 @@ async function refreshCompanies() {
             companies
         );
 
-        return;
+    } else {
+
+        render(
+            companies,
+            currentView
+        );
+
     }
 
 
-    render(
-        companies,
-        currentView
+    // =====================================================
+    // LIVE CHARTS VIEW
+    // =====================================================
+    //
+    // Charts is a separate view from the normal watchlist.
+    // Feed the newest company data into it on every
+    // existing 1-second refresh.
+    //
+
+    updateChartsView(
+        companies
     );
 }
 

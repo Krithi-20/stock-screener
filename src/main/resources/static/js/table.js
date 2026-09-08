@@ -12,6 +12,145 @@ import {
     addSymbolFromTable
 } from "./watchlist.js";
 
+// =========================================================
+// DAILY TOP MOVERS HIGHLIGHTS
+// =========================================================
+
+const DAILY_HIGHLIGHT_STORAGE_KEY =
+    "stock-screener-daily-mover-highlights";
+
+function getTodayDate() {
+    const now = new Date();
+
+    return (
+        now.getFullYear() +
+        "-" +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(now.getDate()).padStart(2, "0")
+    );
+}
+
+function getDailyHighlights() {
+
+    const today =
+        getTodayDate();
+
+    let stored;
+
+    try {
+
+        stored = JSON.parse(
+            localStorage.getItem(
+                DAILY_HIGHLIGHT_STORAGE_KEY
+            )
+        );
+
+    } catch (error) {
+
+        stored = null;
+
+    }
+
+    // New day → start fresh
+    if (
+        !stored ||
+        stored.date !== today
+    ) {
+
+        stored = {
+            date: today,
+            gainers: [],
+            losers: []
+        };
+
+        localStorage.setItem(
+            DAILY_HIGHLIGHT_STORAGE_KEY,
+            JSON.stringify(stored)
+        );
+
+    }
+
+    return stored;
+}
+
+function saveDailyHighlights(
+    highlights
+) {
+
+    localStorage.setItem(
+        DAILY_HIGHLIGHT_STORAGE_KEY,
+        JSON.stringify(highlights)
+    );
+
+}
+
+function updateDailyHighlight(
+    company
+) {
+
+    const changePercent =
+        Number(
+            company.changePercent
+        );
+
+    if (
+        !Number.isFinite(
+            changePercent
+        )
+    ) {
+        return;
+    }
+
+    const symbol =
+        company.nseSymbol;
+
+    if (!symbol) {
+        return;
+    }
+
+    const highlights =
+        getDailyHighlights();
+
+    let changed = false;
+
+    // Top Gainer threshold
+    if (
+        changePercent >= 8 &&
+        !highlights.gainers.includes(symbol)
+    ) {
+
+        highlights.gainers.push(
+            symbol
+        );
+
+        changed = true;
+
+    }
+
+    // Top Loser threshold
+    if (
+        changePercent <= -8 &&
+        !highlights.losers.includes(symbol)
+    ) {
+
+        highlights.losers.push(
+            symbol
+        );
+
+        changed = true;
+
+    }
+
+    if (changed) {
+
+        saveDailyHighlights(
+            highlights
+        );
+
+    }
+
+}
 
 // =========================================================
 // SELECTION / VISITED STATE
@@ -504,6 +643,13 @@ function renderCurrentRows() {
             currentView
         );
 
+    currentCompanies.forEach(
+    company => {
+        updateDailyHighlight(
+            company
+        );
+    }
+);
 
     // =====================================================
     // NO DATA
@@ -572,7 +718,18 @@ function renderCurrentRows() {
                     symbol
                 );
 
+            const dailyHighlights =
+    getDailyHighlights();
 
+const isDailyGainer =
+    dailyHighlights.gainers.includes(
+        symbol
+    );
+
+const isDailyLoser =
+    dailyHighlights.losers.includes(
+        symbol
+    );
             // =================================================
             // CHANGE CLASS
             // =================================================
@@ -1107,12 +1264,39 @@ actions.appendChild(
             // CHANGE %
             // =================================================
 
-            row.appendChild(
-                createCell(
-                    changeClass,
-                    changePercent
-                )
-            );
+            const changePercentCell =
+    createCell(
+        changeClass,
+        changePercent
+    );
+
+if (
+    !isVisited
+) {
+
+    if (
+        isDailyGainer
+    ) {
+
+        changePercentCell.classList.add(
+            "daily-gainer-highlight"
+        );
+
+    } else if (
+        isDailyLoser
+    ) {
+
+        changePercentCell.classList.add(
+            "daily-loser-highlight"
+        );
+
+    }
+
+}
+
+row.appendChild(
+    changePercentCell
+);;
 
 
             // =================================================

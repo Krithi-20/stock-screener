@@ -3177,3 +3177,308 @@ async function selectChartSymbol(
     }
 
 }
+
+export function updateChartsView(
+    companies = []
+) {
+
+    if (
+        !chartsViewOpen
+    ) {
+
+        return;
+    }
+
+
+    // =====================================================
+    // UPDATE CHART SIDE PANEL
+    // =====================================================
+
+    const body =
+        document.getElementById(
+            "watchlistChartSideBody"
+        );
+
+
+    if (
+        body
+    ) {
+
+        const companyMap =
+            new Map(
+                companies.map(
+                    company => [
+                        company.nseSymbol,
+                        company
+                    ]
+                )
+            );
+
+
+        body
+            .querySelectorAll(
+                ".watchlist-chart-row"
+            )
+            .forEach(
+                row => {
+
+                    const symbol =
+                        row.dataset.symbol;
+
+                    const company =
+                        companyMap.get(
+                            symbol
+                        );
+
+
+                    if (
+                        !company
+                    ) {
+
+                        return;
+                    }
+
+
+                    const changeElement =
+                        row.querySelector(
+                            ".chart-change"
+                        );
+
+                    const priceElement =
+                        row.querySelector(
+                            ".chart-price"
+                        );
+
+
+                    // =============================================
+                    // CHANGE %
+                    // =============================================
+
+                    if (
+                        changeElement &&
+                        company.changePercent !== null &&
+                        company.changePercent !== undefined
+                    ) {
+
+                        const change =
+                            Number(
+                                company.changePercent
+                            );
+
+
+                        changeElement.textContent =
+                            (
+                                change > 0
+                                    ? "+"
+                                    : ""
+                            ) +
+                            change.toFixed(2) +
+                            "%";
+
+
+                        changeElement.classList.remove(
+                            "watchlist-positive",
+                            "watchlist-negative",
+                            "watchlist-neutral"
+                        );
+
+
+                        changeElement.classList.add(
+                            change > 0
+                                ? "watchlist-positive"
+                                : change < 0
+                                    ? "watchlist-negative"
+                                    : "watchlist-neutral"
+                        );
+                    }
+
+
+                    // =============================================
+                    // LIVE PRICE
+                    // =============================================
+
+                    if (
+                        priceElement &&
+                        company.livePrice !== null &&
+                        company.livePrice !== undefined
+                    ) {
+
+                        const price =
+                            Number(
+                                company.livePrice
+                            );
+
+
+                        if (
+                            Number.isFinite(price)
+                        ) {
+
+                            priceElement.textContent =
+                                "₹" +
+                                price.toLocaleString(
+                                    "en-IN",
+                                    {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }
+                                );
+                        }
+                    }
+                }
+            );
+    }
+
+
+    // =====================================================
+    // UPDATE SELECTED CHART
+    // =====================================================
+
+    if (
+        !selectedChartSymbol ||
+        !candlestickSeries
+    ) {
+
+        return;
+    }
+
+
+    const selectedCompany =
+        companies.find(
+            company =>
+                company.nseSymbol ===
+                selectedChartSymbol
+        );
+
+
+    if (
+        !selectedCompany
+    ) {
+
+        return;
+    }
+
+
+    const livePrice =
+        Number(
+            selectedCompany.livePrice
+        );
+
+
+    if (
+        !Number.isFinite(livePrice)
+    ) {
+
+        return;
+    }
+
+
+    liveChartLastPrice =
+        livePrice;
+
+
+    // =====================================================
+    // CURRENT MINUTE
+    // =====================================================
+
+    const now =
+        new Date();
+
+    const currentMinute =
+        Math.floor(
+            now.getTime() /
+            60000
+        ) * 60;
+
+
+    // =====================================================
+    // UPDATE CURRENT CANDLE
+    // =====================================================
+
+    if (
+        liveChartData.length > 0
+    ) {
+
+        const lastCandle =
+            liveChartData[
+                liveChartData.length - 1
+            ];
+
+
+        if (
+            Number(lastCandle.time) ===
+            currentMinute
+        ) {
+
+            lastCandle.high =
+                Math.max(
+                    Number(lastCandle.high),
+                    livePrice
+                );
+
+            lastCandle.low =
+                Math.min(
+                    Number(lastCandle.low),
+                    livePrice
+                );
+
+            lastCandle.close =
+                livePrice;
+
+
+            candlestickSeries.update(
+                lastCandle
+            );
+
+            return;
+        }
+    }
+
+
+    // =====================================================
+    // NEW MINUTE CANDLE
+    // =====================================================
+
+    const previousClose =
+        liveChartData.length > 0
+            ? Number(
+                liveChartData[
+                    liveChartData.length - 1
+                ].close
+            )
+            : livePrice;
+
+
+    const newCandle = {
+
+        time:
+            currentMinute,
+
+        open:
+            previousClose,
+
+        high:
+            Math.max(
+                previousClose,
+                livePrice
+            ),
+
+        low:
+            Math.min(
+                previousClose,
+                livePrice
+            ),
+
+        close:
+            livePrice
+    };
+
+
+    liveChartData.push(
+        newCandle
+    );
+
+
+    candlestickSeries.update(
+        newCandle
+    );
+}
