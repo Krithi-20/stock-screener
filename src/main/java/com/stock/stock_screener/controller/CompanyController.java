@@ -134,12 +134,17 @@ public class CompanyController {
 
 @GetMapping("/companies/{symbol}/candles")
 public List<Candle> getHistoricalCandles(
-        @PathVariable String symbol)
+        @PathVariable String symbol,
+        @RequestParam(
+                defaultValue = "1d"
+        )
+        String timeframe)
         throws Exception {
 
     return historicalCandleService
-            .getDailyCandles(
-                    symbol
+            .getCandles(
+                    symbol,
+                    timeframe
             );
 }
     // =========================================================

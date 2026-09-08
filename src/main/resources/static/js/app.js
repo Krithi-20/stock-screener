@@ -13,9 +13,13 @@ import {
 
 import {
     initializeWatchlists,
-    renderWatchlists,
-    updateChartsView
+    renderWatchlists
 } from "./watchlist.js";
+
+
+import {
+    updateChartsView
+} from "./watchlistCharts.js";
 
 
 // =========================================================
