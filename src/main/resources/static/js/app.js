@@ -1,4 +1,9 @@
 import {
+    initializeStockNotifications,
+    checkStockNotification
+} from "./stockNotifications.js";
+
+import {
     loadCompanies,
     loadMarketIndices
 } from "./api.js";
@@ -36,45 +41,46 @@ let currentView = "all";
 // =========================================================
 
 async function refreshCompanies() {
+    const data = await loadCompanies();
 
-    const data =
-        await loadCompanies();
-
-    companies =
-        data;
-
-
-    if (
-        currentView === "watchlist"
-    ) {
-
-        renderWatchlists(
-            companies
+    // Check whether each stock has crossed the +8% threshold.
+    if (Array.isArray(data)) {
+        const previousCompanies = new Map(
+            companies.map(company => [
+                company.nseSymbol,
+                Number(company.changePercent)
+            ])
         );
 
-    } else {
+        data.forEach(company => {
+            const symbol = company.nseSymbol;
 
-        render(
-            companies,
-            currentView
-        );
+            // Only compare stocks that were present in the
+            // previous refresh.
+            if (previousCompanies.has(symbol)) {
+                const previousChangePercent =
+                    previousCompanies.get(symbol);
 
+                checkStockNotification(
+                    company,
+                    previousChangePercent
+                );
+            }
+        });
     }
 
+    companies = data;
 
-    // =====================================================
-    // LIVE CHARTS VIEW
-    // =====================================================
-    //
-    // Charts is a separate view from the normal watchlist.
-    // Feed the newest company data into it on every
-    // existing 1-second refresh.
-    //
+    if (currentView === "watchlist") {
+        renderWatchlists(companies);
+    } else {
+        render(companies, currentView);
+    }
 
-    updateChartsView(
-        companies
-    );
+    // Update the charts with the newest company data.
+    updateChartsView(companies);
 }
+
 
 
 // =========================================================
@@ -438,6 +444,8 @@ document
 // =========================================================
 // INITIAL LOAD
 // =========================================================
+
+initializeStockNotifications();
 
 initializeWatchlists();
 
