@@ -249,6 +249,7 @@ function saveCurrentTabState() {
 // COPY SYMBOLS
 // =========================================================
 
+
 async function copySymbols(symbols) {
 
     if (symbols.length === 0) {
@@ -267,36 +268,7 @@ async function copySymbols(symbols) {
                 return symbol;
             }
 
-            const changePercent =
-                company.changePercent !== null &&
-                company.changePercent !== undefined
-                    ? formatPercent(
-                          company.changePercent
-                      )
-                    : "—";
-
-            const livePrice =
-                company.livePrice !== null &&
-                company.livePrice !== undefined
-                    ? "₹" +
-                      Number(
-                          company.livePrice
-                      ).toLocaleString(
-                          "en-IN",
-                          {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2
-                          }
-                      )
-                    : "—";
-
-            return (
-                symbol +
-                "\t" +
-                changePercent +
-                "\t" +
-                livePrice
-            );
+            return company.companyName;
         })
         .join("\n");
 
@@ -318,7 +290,6 @@ async function copySymbols(symbols) {
         return false;
     }
 }
-
 
 // =========================================================
 // GET SELECTION STATE
