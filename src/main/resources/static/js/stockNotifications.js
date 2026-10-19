@@ -78,6 +78,7 @@ function formatTime(timestamp) {
     });
 }
 
+
 function playBeep() {
     try {
         const AudioContextClass =
@@ -97,27 +98,29 @@ function playBeep() {
 
         const oscillator = audioContext.createOscillator();
         const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
 
-        oscillator.type = "sine";
-        oscillator.frequency.value = 880;
+        // A sharper, more noticeable alert tone.
+        oscillator.type = "square";
+        oscillator.frequency.value = 1250;
 
-        gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(
-            0.12,
-            audioContext.currentTime + 0.02
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            audioContext.currentTime + 0.20
-        );
+        // Two short beeps.
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.28, now + 0.015);
+        gain.gain.setValueAtTime(0.28, now + 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+
+        gain.gain.setValueAtTime(0.0001, now + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.28, now + 0.165);
+        gain.gain.setValueAtTime(0.28, now + 0.24);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
 
         oscillator.connect(gain);
         gain.connect(audioContext.destination);
 
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.22);
+        oscillator.start(now);
+        oscillator.stop(now + 0.28);
     } catch (error) {
-        // Audio must never interrupt live market-data processing.
         console.debug("Stock alert sound unavailable:", error);
     }
 }
