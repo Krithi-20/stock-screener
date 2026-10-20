@@ -1,5 +1,5 @@
 
-const THRESHOLD = 8;
+const THRESHOLD = 7.5;
 const TOAST_DURATION = 4000;
 const HISTORY_TTL = 24 * 60 * 60 * 1000;
 

@@ -171,19 +171,31 @@ public class DailyMarketDataService {
 
         } catch (Exception e) {
 
-            System.err.println(
-                    "Daily market data update failed."
-            );
+    System.err.println(
+            "Daily market data update failed."
+    );
 
-            /*
-             * Existing files remain untouched.
-             */
-            System.err.println(
-                    "Existing data has NOT been deleted."
-            );
+    System.err.println(
+            "Continuing with the existing market data, if available."
+    );
 
-            e.printStackTrace();
-        }
+    e.printStackTrace();
+
+    if (
+            Files.exists(NSE_BHAVCOPY_FILE)
+            && Files.exists(MCAP_FILE)
+            && Files.exists(NSE_SECURITY_FILE)
+    ) {
+        System.out.println(
+                "Previous market data files found. "
+                + "Keeping the existing data."
+        );
+    } else {
+        System.err.println(
+                "Warning: Some existing market data files are missing."
+        );
+    }
+}
     }
 
     // =========================================================
