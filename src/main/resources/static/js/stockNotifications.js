@@ -268,7 +268,7 @@ function showToast(alert) {
         createElement(
             "strong",
             "stock-alert-toast-title",
-            `${alert.symbol} crossed +8%`
+            `${alert.symbol} crossed +${THRESHOLD}%    `
         )
     );
 
