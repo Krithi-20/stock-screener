@@ -364,7 +364,7 @@ export function checkStockNotification(stock, previousChangePercent) {
         return;
     }
 
-    // Alert only on a crossing from below +8% to +8% or above.
+    // Alert only on a crossing from below +7.5% to +7.5% or above.
     if (previous < THRESHOLD && current >= THRESHOLD) {
         createAlert(stock, current);
     }

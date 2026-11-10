@@ -116,7 +116,7 @@ function updateDailyHighlight(
 
     // Top Gainer threshold
     if (
-        changePercent >= 8 &&
+        changePercent >= 7.5 &&
         !highlights.gainers.includes(symbol)
     ) {
 
@@ -130,7 +130,7 @@ function updateDailyHighlight(
 
     // Top Loser threshold
     if (
-        changePercent <= -8 &&
+        changePercent <= -7.5 &&
         !highlights.losers.includes(symbol)
     ) {
 

@@ -31,6 +31,15 @@ public class NseDownloadService {
                     "security-master.csv"
             );
 
+    /*
+     * Stores the trading date represented by
+     * security-master.csv.
+     */
+    private static final Path DATE_MARKER =
+            NSE_DIRECTORY.resolve(
+                    "security-master-date.txt"
+            );
+
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("ddMMyyyy");
 
@@ -38,6 +47,22 @@ public class NseDownloadService {
             "https://nsearchives.nseindia.com/content/cm/"
                     + "NSE_CM_security_%s.csv.gz";
 
+
+    // =========================================================
+    // DOWNLOAD PREVIOUS TRADING DAY
+    // =========================================================
+
+    /*
+     * Starts with the previous weekday.
+     *
+     * If NSE does not have a file for that date
+     * (HTTP 404 or 410), it tries the previous weekday.
+     *
+     * This handles unexpected market holidays.
+     *
+     * Other errors, such as network failures or
+     * server errors, do not trigger date fallback.
+     */
     public void downloadPreviousTradingDayFile() {
 
         try {
@@ -46,88 +71,163 @@ public class NseDownloadService {
                     NSE_DIRECTORY
             );
 
-            LocalDate previousTradingDay =
+            LocalDate tradingDate =
                     getPreviousTradingDay();
 
-            String date =
-                    previousTradingDay.format(
-                            DATE_FORMAT
-                    );
-
             /*
-             * Temporary files are dated so we know
-             * exactly which trading day's file we
-             * downloaded.
+             * Try up to 10 previous weekdays.
              */
-            Path tempCsvFile =
-                    NSE_DIRECTORY.resolve(
-                            "NSE_CM_security_"
-                                    + date
-                                    + ".csv"
-                    );
-
-            Path gzipFile =
-                    NSE_DIRECTORY.resolve(
-                            "NSE_CM_security_"
-                                    + date
-                                    + ".csv.gz"
-                    );
-
-            /*
-             * If the current security-master.csv
-             * already exists AND it represents today's
-             * required trading date, skip downloading.
-             *
-             * We use a small date marker file to know
-             * which trading date it belongs to.
-             */
-            Path dateMarker =
-                    NSE_DIRECTORY.resolve(
-                            "security-master-date.txt"
-                    );
-
-            if (
-                    Files.exists(
-                            CURRENT_SECURITY_FILE
-                    )
-                            &&
-                    Files.exists(dateMarker)
+            for (
+                    int attempt = 0;
+                    attempt < 10;
+                    attempt++
             ) {
 
-                String savedDate =
-                        Files.readString(
-                                dateMarker
-                        ).trim();
-
-                if (
-                        savedDate.equals(
-                                previousTradingDay
-                                        .toString()
-                        )
-                ) {
+                try {
 
                     System.out.println(
-                            "[NSE] Security Master for "
-                                    + previousTradingDay
-                                    + " already exists. "
-                                    + "Skipping download."
+                            "[NSE] Trying Security Master for "
+                                    + tradingDate
+                                    + "..."
+                    );
+
+                    downloadForDate(
+                            tradingDate
                     );
 
                     return;
+
+                } catch (
+                        MissingTradingDayException e
+                ) {
+
+                    System.out.println(
+                            "[NSE] Security Master unavailable for "
+                                    + tradingDate
+                                    + ". Trying previous weekday."
+                    );
+
+                    tradingDate =
+                            getPreviousWeekday(
+                                    tradingDate
+                            );
                 }
             }
 
-            System.out.println(
-                    "[NSE] Downloading Security Master for "
-                            + previousTradingDay
-                            + "..."
+            throw new IOException(
+                    "[NSE] Could not find a Security Master "
+                            + "file in the last 10 attempts."
             );
 
-            String url =
-                    String.format(
-                            NSE_SECURITY_URL,
-                            date
-                    );
+        } catch (Exception e) {
+
+            System.err.println(
+                    "[NSE] Download failed: "
+                            + e.getMessage()
+            );
+
+            /*
+             * Existing security-master.csv remains
+             * untouched if the new download fails.
+             */
+        }
+    }
+
+
+    // =========================================================
+    // DOWNLOAD FOR AN EXACT DATE
+    // =========================================================
+
+    /*
+     * Downloads the NSE Security Master for exactly
+     * the supplied trading date.
+     *
+     * This method will be used by DailyMarketDataService
+     * when coordinating the trading date across files.
+     *
+     * It does NOT independently move backwards to another date.
+     */
+    public void downloadForDate(
+            LocalDate tradingDate
+    ) throws IOException {
+
+        Files.createDirectories(
+                NSE_DIRECTORY
+        );
+
+        String date =
+                tradingDate.format(
+                        DATE_FORMAT
+                );
+
+        /*
+         * Temporary files are dated so we know
+         * exactly which trading day's file we downloaded.
+         */
+        Path tempCsvFile =
+                NSE_DIRECTORY.resolve(
+                        "NSE_CM_security_"
+                                + date
+                                + ".csv.tmp"
+                );
+
+        Path gzipFile =
+                NSE_DIRECTORY.resolve(
+                        "NSE_CM_security_"
+                                + date
+                                + ".csv.gz.tmp"
+                );
+
+        /*
+         * If the current security-master.csv already exists
+         * AND it represents the requested trading date,
+         * skip downloading.
+         */
+        if (
+                Files.exists(
+                        CURRENT_SECURITY_FILE
+                )
+                        &&
+                Files.exists(
+                        DATE_MARKER
+                )
+        ) {
+
+            String savedDate =
+                    Files.readString(
+                            DATE_MARKER
+                    ).trim();
+
+            if (
+                    savedDate.equals(
+                            tradingDate.toString()
+                    )
+            ) {
+
+                System.out.println(
+                        "[NSE] Security Master for "
+                                + tradingDate
+                                + " already exists. "
+                                + "Skipping download."
+                );
+
+                return;
+            }
+        }
+
+        System.out.println(
+                "[NSE] Downloading Security Master for "
+                        + tradingDate
+                        + "..."
+        );
+
+        String url =
+                String.format(
+                        NSE_SECURITY_URL,
+                        date
+                );
+
+        try {
 
             /*
              * Download the gzip first.
@@ -150,13 +250,6 @@ public class NseDownloadService {
             );
 
             /*
-             * Delete gzip after successful extraction.
-             */
-            Files.deleteIfExists(
-                    gzipFile
-            );
-
-            /*
              * Make sure the downloaded CSV is not empty.
              */
             if (
@@ -168,10 +261,6 @@ public class NseDownloadService {
                             tempCsvFile
                     ) == 0
             ) {
-
-                Files.deleteIfExists(
-                        tempCsvFile
-                );
 
                 throw new IOException(
                         "Downloaded NSE Security Master "
@@ -187,6 +276,9 @@ public class NseDownloadService {
              * The application always reads:
              *
              * data/nse/security-master.csv
+             *
+             * Replace the active file only after the
+             * new file has downloaded and extracted.
              */
             Files.move(
                     tempCsvFile,
@@ -200,8 +292,8 @@ public class NseDownloadService {
              * security-master.csv belongs to.
              */
             Files.writeString(
-                    dateMarker,
-                    previousTradingDay.toString()
+                    DATE_MARKER,
+                    tradingDate.toString()
             );
 
             /*
@@ -213,58 +305,89 @@ public class NseDownloadService {
             System.out.println(
                     "[NSE] Download successful: "
                             + CURRENT_SECURITY_FILE
+                            + " for "
+                            + tradingDate
             );
 
-        } catch (Exception e) {
-
-            System.err.println(
-                    "[NSE] Download failed: "
-                            + e.getMessage()
-            );
+        } finally {
 
             /*
-             * Existing security-master.csv remains
-             * untouched if the new download fails.
+             * Clean up temporary files whether
+             * the download succeeds or fails.
              */
+            Files.deleteIfExists(
+                    tempCsvFile
+            );
+
+            Files.deleteIfExists(
+                    gzipFile
+            );
         }
     }
+
 
     // =========================================================
     // PREVIOUS TRADING DAY
     // =========================================================
 
+    /*
+     * Returns the previous weekday.
+     *
+     * Saturday -> Friday
+     * Sunday   -> Friday
+     *
+     * This handles weekends.
+     * Unexpected market holidays are handled by
+     * the download fallback logic above.
+     */
     private LocalDate getPreviousTradingDay() {
 
-        LocalDate date =
-                LocalDate.now().minusDays(1);
+        return getPreviousWeekday(
+                LocalDate.now()
+        );
+    }
+
+
+    /*
+     * Returns the previous weekday relative to
+     * the supplied date.
+     */
+    private LocalDate getPreviousWeekday(
+            LocalDate date
+    ) {
+
+        LocalDate previousDate =
+                date.minusDays(1);
+
+        while (
+                isWeekend(
+                        previousDate
+                )
+        ) {
+
+            previousDate =
+                    previousDate.minusDays(1);
+        }
+
+        return previousDate;
+    }
+
+
+    /*
+     * Checks whether a date falls on a weekend.
+     */
+    private boolean isWeekend(
+            LocalDate date
+    ) {
 
         DayOfWeek day =
                 date.getDayOfWeek();
 
-        /*
-         * Saturday -> Friday
-         */
-        if (
-                day == DayOfWeek.SATURDAY
-        ) {
-
-            date =
-                    date.minusDays(1);
-        }
-
-        /*
-         * Sunday -> Friday
-         */
-        else if (
-                day == DayOfWeek.SUNDAY
-        ) {
-
-            date =
-                    date.minusDays(2);
-        }
-
-        return date;
+        return day == DayOfWeek.SATURDAY
+                ||
+                day == DayOfWeek.SUNDAY;
     }
+
 
     // =========================================================
     // DELETE OLD DATED FILES
@@ -285,6 +408,7 @@ public class NseDownloadService {
                 if (
                         Files.isDirectory(file)
                 ) {
+
                     continue;
                 }
 
@@ -295,14 +419,21 @@ public class NseDownloadService {
                 /*
                  * Delete only dated NSE security
                  * master CSV files.
+                 *
+                 * Do not delete:
+                 *
+                 * security-master.csv
+                 * security-master-date.txt
                  */
                 if (
                         name.startsWith(
                                 "NSE_CM_security_"
                         )
                                 &&
-                        name.endsWith(
-                                ".csv"
+                        (
+                                name.endsWith(".csv")
+                                        ||
+                                name.endsWith(".csv.gz")
                         )
                 ) {
 
@@ -315,27 +446,10 @@ public class NseDownloadService {
                                     + name
                     );
                 }
-
-                /*
-                 * Also remove any leftover gzip.
-                 */
-                if (
-                        name.startsWith(
-                                "NSE_CM_security_"
-                        )
-                                &&
-                        name.endsWith(
-                                ".csv.gz"
-                        )
-                ) {
-
-                    Files.deleteIfExists(
-                            file
-                    );
-                }
             }
         }
     }
+
 
     // =========================================================
     // DOWNLOAD
@@ -354,76 +468,115 @@ public class NseDownloadService {
                                 .toURL()
                                 .openConnection();
 
-        connection.setRequestMethod(
-                "GET"
-        );
+        try {
 
-        connection.setRequestProperty(
-                "User-Agent",
-                "Mozilla/5.0"
-        );
-
-        connection.setRequestProperty(
-                "Accept",
-                "*/*"
-        );
-
-        connection.setConnectTimeout(
-                15000
-        );
-
-        connection.setReadTimeout(
-                30000
-        );
-
-        int responseCode =
-                connection.getResponseCode();
-
-        if (
-                responseCode
-                        !=
-                HttpURLConnection.HTTP_OK
-        ) {
-
-            throw new IOException(
-                    "NSE returned HTTP "
-                            + responseCode
+            connection.setRequestMethod(
+                    "GET"
             );
-        }
 
-        try (
-                InputStream inputStream =
-                        connection.getInputStream();
+            connection.setRequestProperty(
+                    "User-Agent",
+                    "Mozilla/5.0"
+            );
 
-                OutputStream outputStream =
-                        Files.newOutputStream(
-                                destination
-                        )
-        ) {
+            connection.setRequestProperty(
+                    "Accept",
+                    "*/*"
+            );
 
-            byte[] buffer =
-                    new byte[8192];
+            connection.setConnectTimeout(
+                    15000
+            );
 
-            int bytesRead;
+            connection.setReadTimeout(
+                    30000
+            );
 
-            while (
-                    (bytesRead =
-                            inputStream.read(
-                                    buffer
-                            ))
-                            != -1
+            int responseCode =
+                    connection.getResponseCode();
+
+            /*
+             * HTTP 404:
+             * File not found for the requested date.
+             *
+             * HTTP 410:
+             * Requested file is no longer available.
+             *
+             * These are the only responses that trigger
+             * the previous-weekday fallback.
+             */
+            if (
+                    responseCode
+                            == HttpURLConnection.HTTP_NOT_FOUND
+                            ||
+                    responseCode
+                            == HttpURLConnection.HTTP_GONE
             ) {
 
-                outputStream.write(
-                        buffer,
-                        0,
-                        bytesRead
+                throw new MissingTradingDayException(
+                        "NSE file unavailable. HTTP "
+                                + responseCode
                 );
             }
-        }
 
-        connection.disconnect();
+            /*
+             * Other HTTP errors are treated as actual
+             * download failures, not as holidays.
+             */
+            if (
+                    responseCode
+                            != HttpURLConnection.HTTP_OK
+            ) {
+
+                throw new IOException(
+                        "NSE returned HTTP "
+                                + responseCode
+                                + " for "
+                                + urlString
+                );
+            }
+
+            try (
+                    InputStream inputStream =
+                            connection.getInputStream();
+
+                    OutputStream outputStream =
+                            Files.newOutputStream(
+                                    destination
+                            )
+            ) {
+
+                byte[] buffer =
+                        new byte[8192];
+
+                int bytesRead;
+
+                while (
+                        (bytesRead =
+                                inputStream.read(
+                                        buffer
+                                ))
+                                != -1
+                ) {
+
+                    outputStream.write(
+                            buffer,
+                            0,
+                            bytesRead
+                    );
+                }
+            }
+
+        } finally {
+
+            /*
+             * Always disconnect, even if the
+             * download fails.
+             */
+            connection.disconnect();
+        }
     }
+
 
     // =========================================================
     // GZIP EXTRACTION
@@ -467,6 +620,28 @@ public class NseDownloadService {
                         bytesRead
                 );
             }
+        }
+    }
+
+
+    // =========================================================
+    // MISSING TRADING DAY EXCEPTION
+    // =========================================================
+
+    /*
+     * Used only when NSE returns HTTP 404 or 410.
+     *
+     * This lets the fallback logic distinguish
+     * a missing dated file from a network/server error.
+     */
+    public static class MissingTradingDayException
+            extends IOException {
+
+        public MissingTradingDayException(
+                String message
+        ) {
+
+            super(message);
         }
     }
 }

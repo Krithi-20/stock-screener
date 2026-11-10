@@ -1,10 +1,10 @@
+
 package com.stock.stock_screener.service;
 
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -19,12 +19,10 @@ import org.springframework.stereotype.Service;
 public class BseReaderService {
 
     private static final Path BSE_DIR =
-            Path.of(
-                    "data",
-                    "bse",
-                    "scrip",
-                    "SCRIP"
-            );
+            Path.of("data", "bse", "scrip", "SCRIP");
+
+    private static final Path MARKET_CAP_DATE_FILE =
+            Path.of("data", "marketcap", "latest-date.txt");
 
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("ddMMyyyy");
@@ -32,34 +30,49 @@ public class BseReaderService {
     public Map<String, String> readBseGroups()
             throws Exception {
 
-        LocalDate tradingDate =
-                getPreviousTradingDay();
+        // Use the actual trading date selected by
+        // DailyMarketDataService instead of calculating yesterday.
+        if (!Files.exists(MARKET_CAP_DATE_FILE)) {
+            throw new IllegalStateException(
+                    "Market data trading-date marker not found: "
+                            + MARKET_CAP_DATE_FILE
+            );
+        }
+
+        String dateText = Files.readString(
+                MARKET_CAP_DATE_FILE,
+                StandardCharsets.UTF_8
+        ).trim();
+
+        if (dateText.isEmpty()) {
+            throw new IllegalStateException(
+                    "Market data trading-date marker is empty."
+            );
+        }
+
+        LocalDate tradingDate = LocalDate.parse(dateText);
 
         String fileName =
                 "BSE_EQ_SCRIP_"
                         + tradingDate.format(DATE_FORMAT)
                         + ".csv";
 
-        Path bseFile =
-                BSE_DIR.resolve(fileName);
+        Path bseFile = BSE_DIR.resolve(fileName);
 
         if (!Files.exists(bseFile)) {
-
             throw new IllegalStateException(
-                    "BSE security file not found: "
-                            + bseFile
+                    "BSE security file not found for trading date "
+                            + tradingDate + ": " + bseFile
             );
         }
 
-        Map<String, String> bseGroups =
-                new HashMap<>();
+        Map<String, String> bseGroups = new HashMap<>();
 
         try (
-                Reader reader =
-                        Files.newBufferedReader(
-                                bseFile,
-                                StandardCharsets.UTF_8
-                        )
+                Reader reader = Files.newBufferedReader(
+                        bseFile,
+                        StandardCharsets.UTF_8
+                )
         ) {
 
             CSVFormat format =
@@ -70,44 +83,28 @@ public class BseReaderService {
 
             try (
                     CSVParser parser =
-                            new CSVParser(
-                                    reader,
-                                    format
-                            )
+                            new CSVParser(reader, format)
             ) {
 
                 for (CSVRecord record : parser) {
 
-                    String isin =
-                            record.get("ISIN");
+                    String isin = record.get("ISIN");
+                    String group = record.get("SctySrs");
 
-                    String group =
-                            record.get("SctySrs");
-
-                    if (
-                            isin == null
-                                    ||
-                            isin.isBlank()
-                    ) {
+                    if (isin == null || isin.isBlank()) {
                         continue;
                     }
 
-                    if (
-                            group == null
-                                    ||
-                            group.isBlank()
-                    ) {
+                    if (group == null || group.isBlank()) {
                         continue;
                     }
 
-                    group =
-                            group.trim();
+                    group = group.trim();
 
                     // Only Group A and B
                     if (
                             !group.equalsIgnoreCase("A")
-                                    &&
-                            !group.equalsIgnoreCase("B")
+                                    && !group.equalsIgnoreCase("B")
                     ) {
                         continue;
                     }
@@ -123,29 +120,10 @@ public class BseReaderService {
         System.out.println(
                 "[BSE] Group A/B companies loaded: "
                         + bseGroups.size()
+                        + " (Trading date: "
+                        + tradingDate + ")"
         );
 
         return bseGroups;
-    }
-
-    private LocalDate getPreviousTradingDay() {
-
-        LocalDate date =
-                LocalDate.now()
-                        .minusDays(1);
-
-        while (
-                date.getDayOfWeek()
-                        == DayOfWeek.SATURDAY
-                        ||
-                date.getDayOfWeek()
-                        == DayOfWeek.SUNDAY
-        ) {
-
-            date =
-                    date.minusDays(1);
-        }
-
-        return date;
     }
 }
