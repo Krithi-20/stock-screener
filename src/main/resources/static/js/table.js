@@ -196,6 +196,14 @@ let currentCompanies = [];
 
 let currentView = "all";
 
+// =========================================================
+// GLOBAL RANKING FREEZE STATE
+// =========================================================
+
+let rankingFrozen = false;
+
+const frozenRankingOrders = new Map();
+
 
 // =========================================================
 // ACTIVATE TAB STATE
@@ -595,6 +603,126 @@ export function render(
     renderCurrentRows();
 }
 
+// =========================================================
+// FREEZE / MELT RANKINGS
+// =========================================================
+
+function preserveFrozenOrder(data, view) {
+
+    const frozenSymbols =
+        frozenRankingOrders.get(view);
+
+    if (!frozenSymbols) {
+        return data;
+    }
+
+    const companiesBySymbol = new Map(
+        data.map(company => [
+            company.nseSymbol,
+            company
+        ])
+    );
+
+    const orderedData = [];
+
+    // Keep companies in their frozen positions.
+    frozenSymbols.forEach(symbol => {
+
+        const company =
+            companiesBySymbol.get(symbol);
+
+        if (company) {
+            orderedData.push(company);
+        }
+
+    });
+
+    // Append any newly eligible companies at the end.
+    const frozenSymbolSet =
+        new Set(frozenSymbols);
+
+    data.forEach(company => {
+
+        if (!frozenSymbolSet.has(company.nseSymbol)) {
+            orderedData.push(company);
+        }
+
+    });
+
+    return orderedData;
+}
+
+
+function initializeRankingControl() {
+
+    const freezeButton =
+        document.getElementById(
+            "freezeRankingButton"
+        );
+
+    if (!freezeButton) {
+        return;
+    }
+
+    freezeButton.addEventListener(
+        "click",
+        () => {
+
+            // FREEZE
+            if (!rankingFrozen) {
+
+                // Capture the current order of all
+                // three ranking tabs.
+
+                const views = [
+                    "all",
+                    "performers",
+                    "losers"
+                ];
+
+                views.forEach(view => {
+
+                    const displayed =
+                        getDisplayedCompanies(
+                            currentCompanies,
+                            view
+                        );
+
+                    frozenRankingOrders.set(
+                        view,
+                        displayed.map(
+                            company => company.nseSymbol
+                        )
+                    );
+
+                });
+
+                rankingFrozen = true;
+
+                freezeButton.textContent = "Melt";
+
+            }
+
+            // MELT
+            else {
+
+                rankingFrozen = false;
+
+                frozenRankingOrders.clear();
+
+                freezeButton.textContent = "Freeze";
+
+            }
+
+            // Immediately redraw using the appropriate order.
+            // Latest company data is used in both cases.
+
+            renderCurrentRows();
+
+        }
+    );
+
+}
 
 // =========================================================
 // RENDER CURRENT ROWS
@@ -608,11 +736,21 @@ function renderCurrentRows() {
         );
 
 
-    const data =
-        getDisplayedCompanies(
-            currentCompanies,
+    let data =
+    getDisplayedCompanies(
+        currentCompanies,
+        currentView
+    );
+
+    // When frozen, retain the captured ranking order.
+    if (rankingFrozen) {
+
+        data = preserveFrozenOrder(
+            data,
             currentView
         );
+
+    }
 
     currentCompanies.forEach(
     company => {
@@ -1366,3 +1504,5 @@ function createCell(
 
     return cell;
 }
+
+initializeRankingControl();
