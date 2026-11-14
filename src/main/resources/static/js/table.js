@@ -340,135 +340,66 @@ function getSelectionState() {
 // COPY SELECTED
 // =========================================================
 
+
 async function copySelected(button) {
 
-    const symbols =
-        [...selectedSymbols];
+    // Copy only selected symbols that have NOT
+    // already been copied in the current tab.
+    const symbols = [...selectedSymbols].filter(
+        symbol => !copiedSymbols.has(symbol)
+    );
 
     if (symbols.length === 0) {
         return;
     }
 
-
-    // Prevent double-clicking while
-    // the copy operation is running
-
-    if (
-        button.disabled
-    ) {
-
+    // Prevent double-clicking while copying.
+    if (button.disabled) {
         return;
-
     }
-
 
     button.disabled = true;
 
+    // Copy only the newly selected symbols.
+    const copied = await copySymbols(symbols);
 
-    // Copy ONLY currently checked symbols
-    // from the CURRENT TAB
+    // Update state only if copying succeeded.
+    if (copied) {
 
-    const copied =
-        await copySymbols(
-            symbols
-        );
+        symbols.forEach(symbol => {
 
+            visitedSymbols.add(symbol);
+            copiedSymbols.add(symbol);
 
-    // Only update the UI if copying
-    // actually succeeded
+        });
 
-    if (
-        copied
-    ) {
-
-        // Mark ONLY currently checked symbols
-        // in the CURRENT TAB as visited
-
-        symbols.forEach(
-            symbol => {
-
-                visitedSymbols.add(
-                    symbol
-                );
-
-                copiedSymbols.add(
-                    symbol
-                );
-
-            }
-        );
-
-
-        // Save this tab's state
-
+        // Save this tab's state.
         saveCurrentTabState();
 
+        button.textContent = "✓ Copied";
+        button.classList.add("copied");
+        button.disabled = true;
 
-        // Show successful copy state
+        setTimeout(() => {
 
-        button.textContent =
-            "✓ Copied";
+            button.textContent = "Copy";
+            button.classList.remove("copied");
+            button.disabled = false;
 
-        button.classList.add(
-            "copied"
-        );
-
-
-        // Keep the button visible while
-        // showing the success message
-
-        button.disabled =
-            true;
-
-
-        // Reset button after 1.5 seconds
-
-        setTimeout(
-            () => {
-
-                button.textContent =
-                    "Copy";
-
-                button.classList.remove(
-                    "copied"
-                );
-
-                button.disabled =
-                    false;
-
-            },
-            1500
-        );
+        }, 1500);
 
     } else {
 
-        // Copy failed
+        button.textContent = "Copy failed";
+        button.classList.add("copy-failed");
 
-        button.textContent =
-            "Copy failed";
+        setTimeout(() => {
 
-        button.classList.add(
-            "copy-failed"
-        );
+            button.textContent = "Copy";
+            button.classList.remove("copy-failed");
+            button.disabled = false;
 
-
-        setTimeout(
-            () => {
-
-                button.textContent =
-                    "Copy";
-
-                button.classList.remove(
-                    "copy-failed"
-                );
-
-                button.disabled =
-                    false;
-
-            },
-            1500
-        );
-
+        }, 1500);
     }
 }
 
