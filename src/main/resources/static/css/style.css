@@ -809,3 +809,250 @@ tbody tr:hover {
 .watchlist-action:hover {
     background: #d1d5db;
 }
+
+
+/* =====================================================
+   FILTER MENU
+   ===================================================== */
+
+.filter-menu-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: auto;
+    z-index: 100;
+}
+
+.filter-menu-button {
+    width: 42px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-menu-button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 190px;
+    padding: 6px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    z-index: 200;
+}
+
+.filter-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 11px 12px;
+    text-align: left;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-dropdown-item:hover {
+    background: #f3f4f6;
+}
+
+.filter-panel {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 320px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    z-index: 200;
+}
+
+.filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #1f2937;
+    font-size: 15px;
+}
+
+.filter-close-button {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.filter-description {
+    margin: 10px 0 15px;
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.filter-panel select {
+    width: 100%;
+}
+
+/* =====================================================
+   CHANGE % COLOUR RULES
+   ===================================================== */
+
+.color-rules-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.color-rule {
+    display: grid;
+    grid-template-columns: 1fr 1fr 42px 30px;
+    align-items: center;
+    gap: 7px;
+}
+
+.color-rule input[type="number"] {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 5px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+}
+
+.color-rule input:focus {
+    border-color: #8b5cf6;
+}
+
+.color-rule input[type="color"] {
+    width: 38px;
+    height: 34px;
+    padding: 2px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+}
+
+.remove-color-rule {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 5px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.remove-color-rule:hover {
+    background: #fecaca;
+}
+
+.add-color-rule-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 9px;
+    border: 1px dashed #9ca3af;
+    border-radius: 7px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-color-rule-button:hover {
+    background: #f3f4f6;
+}
+
+.color-panel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.save-color-rules-button,
+.reset-color-rules-button {
+    flex: 1;
+    padding: 9px 5px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-color-rules-button {
+    background: #111827;
+    color: white;
+}
+
+.reset-color-rules-button {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.color-rules-message {
+    min-height: 16px;
+    margin: 9px 0 0;
+    font-size: 11px;
+    color: #dc2626;
+}
+
+/* =====================================================
+   CUSTOM CHANGE % HIGHLIGHT
+   ===================================================== */
+
+.custom-change-highlight {
+    font-weight: 700;
+}
+
+.visited-row td.custom-change-highlight {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+}
+
+/* FILTER MENU POSITIONING */
+
+.filter-menu-container {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* MARKET CAP SELECT */
+
+.filter-panel select {
+    min-width: 125px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+}

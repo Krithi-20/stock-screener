@@ -12,145 +12,550 @@ import {
     addSymbolFromTable
 } from "./watchlist.js";
 
+
 // =========================================================
-// DAILY TOP MOVERS HIGHLIGHTS
+// CUSTOM CHANGE % COLOUR RULES
 // =========================================================
 
-const DAILY_HIGHLIGHT_STORAGE_KEY =
-    "stock-screener-daily-mover-highlights";
+const COLOR_RULES_KEY =
+    "strykr-custom-change-color-rules";
 
-function getTodayDate() {
+const COLOR_ASSIGNMENTS_KEY =
+    "strykr-custom-change-color-assignments";
+
+function getTradingDate() {
     const now = new Date();
 
     return (
-        now.getFullYear() +
-        "-" +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        "-" +
+        now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
         String(now.getDate()).padStart(2, "0")
     );
 }
 
-function getDailyHighlights() {
+// ---------------------------------------------------------
+// LOAD RULES
+// ---------------------------------------------------------
 
-    const today =
-        getTodayDate();
+function getColorRules() {
+    try {
+        const rules = JSON.parse(
+            localStorage.getItem(COLOR_RULES_KEY)
+        );
 
-    let stored;
+        return Array.isArray(rules) ? rules : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+// ---------------------------------------------------------
+// SAVE RULES
+// ---------------------------------------------------------
+
+function saveColorRules(rules) {
+    localStorage.setItem(
+        COLOR_RULES_KEY,
+        JSON.stringify(rules)
+    );
+}
+
+// ---------------------------------------------------------
+// LOAD DAILY ASSIGNMENTS
+// ---------------------------------------------------------
+
+let cachedColorAssignments = null;
+
+function getColorAssignments() {
+    const today = getTradingDate();
+
+    if (
+        cachedColorAssignments &&
+        cachedColorAssignments.date === today
+    ) {
+        return cachedColorAssignments;
+    }
 
     try {
-
-        stored = JSON.parse(
-            localStorage.getItem(
-                DAILY_HIGHLIGHT_STORAGE_KEY
-            )
+        const stored = JSON.parse(
+            localStorage.getItem(COLOR_ASSIGNMENTS_KEY)
         );
 
+        if (
+            stored &&
+            stored.date === today &&
+            stored.assignments &&
+            typeof stored.assignments === "object"
+        ) {
+            cachedColorAssignments = stored;
+        } else {
+            cachedColorAssignments = {
+                date: today,
+                assignments: {}
+            };
+
+            localStorage.setItem(
+                COLOR_ASSIGNMENTS_KEY,
+                JSON.stringify(cachedColorAssignments)
+            );
+        }
     } catch (error) {
-
-        stored = null;
-
-    }
-
-    // New day → start fresh
-    if (
-        !stored ||
-        stored.date !== today
-    ) {
-
-        stored = {
+        cachedColorAssignments = {
             date: today,
-            gainers: [],
-            losers: []
+            assignments: {}
         };
-
-        localStorage.setItem(
-            DAILY_HIGHLIGHT_STORAGE_KEY,
-            JSON.stringify(stored)
-        );
-
     }
 
-    return stored;
+    return cachedColorAssignments;
 }
 
-function saveDailyHighlights(
-    highlights
-) {
+function saveColorAssignments(assignments) {
+
+    cachedColorAssignments = assignments;
 
     localStorage.setItem(
-        DAILY_HIGHLIGHT_STORAGE_KEY,
-        JSON.stringify(highlights)
+        COLOR_ASSIGNMENTS_KEY,
+        JSON.stringify(assignments)
     );
-
 }
 
-function updateDailyHighlight(
-    company
-) {
+// ---------------------------------------------------------
+// ASSIGN COLOUR ON FIRST MATCH
+// ---------------------------------------------------------
 
+function updateCustomColorAssignment(company) {
     const changePercent =
-        Number(
-            company.changePercent
-        );
-
-    if (
-        !Number.isFinite(
-            changePercent
-        )
-    ) {
-        return;
-    }
+        Number(Number(company.changePercent).toFixed(2));
 
     const symbol =
         company.nseSymbol;
 
-    if (!symbol) {
+    if (
+        !symbol ||
+        !Number.isFinite(changePercent) ||
+        changePercent <= 0
+    ) {
         return;
     }
 
-    const highlights =
-        getDailyHighlights();
+    const stored =
+        getColorAssignments();
 
-    let changed = false;
-
-    // Top Gainer threshold
-    if (
-        changePercent >= 7.5 &&
-        !highlights.gainers.includes(symbol)
-    ) {
-
-        highlights.gainers.push(
-            symbol
-        );
-
-        changed = true;
-
+    // Already assigned today → NEVER change it.
+    if (stored.assignments[symbol]) {
+        return;
     }
 
-    // Top Loser threshold
-    if (
-        changePercent <= -7.5 &&
-        !highlights.losers.includes(symbol)
-    ) {
+    const rules =
+        getColorRules();
 
-        highlights.losers.push(
-            symbol
+    const matchingRule =
+        rules.find(rule =>
+            changePercent >= rule.lower &&
+            changePercent < rule.upper
         );
 
-        changed = true;
-
+    if (!matchingRule) {
+        return;
     }
 
-    if (changed) {
+    stored.assignments[symbol] = {
+        color: matchingRule.color,
+        lower: matchingRule.lower,
+        upper: matchingRule.upper
+    };
 
-        saveDailyHighlights(
-            highlights
-        );
-
-    }
-
+    saveColorAssignments(stored);
 }
+
+// ---------------------------------------------------------
+// RESET DAILY COLOUR ASSIGNMENTS
+// ---------------------------------------------------------
+
+function resetColorAssignments() {
+    const freshAssignments = {
+        date: getTradingDate(),
+        assignments: {}
+    };
+
+    saveColorAssignments(freshAssignments);
+}
+
+// =========================================================
+// FILTER MENU AND COLOUR RULE UI
+// =========================================================
+
+function initializeColorRuleControls() {
+
+    const menuButton =
+        document.getElementById("filterMenuButton");
+
+    const dropdown =
+        document.getElementById("filterDropdown");
+
+    const marketCapOption =
+        document.getElementById("marketCapFilterOption");
+
+    const colorOption =
+        document.getElementById("changeColorFilterOption");
+
+    const marketCapPanel =
+        document.getElementById("marketCapPanel");
+
+    const colorPanel =
+        document.getElementById("changeColorPanel");
+
+    const rulesContainer =
+        document.getElementById("colorRulesContainer");
+
+    const addButton =
+        document.getElementById("addColorRuleButton");
+
+    const saveButton =
+        document.getElementById("saveColorRulesButton");
+
+    const resetButton =
+        document.getElementById("resetColorRulesButton");
+
+    const closeButton =
+        document.getElementById("closeColorPanel");
+
+    const message =
+        document.getElementById("colorRulesMessage");
+
+    if (
+        !menuButton ||
+        !dropdown ||
+        !rulesContainer
+    ) {
+        return;
+    }
+
+    // -----------------------------------------------------
+    // SHOW / HIDE MENU
+    // -----------------------------------------------------
+
+    function closeAllPanels() {
+        dropdown.style.display = "none";
+        marketCapPanel.style.display = "none";
+        colorPanel.style.display = "none";
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+    menuButton.addEventListener("click", event => {
+        event.stopPropagation();
+
+        const isOpen =
+            dropdown.style.display !== "none";
+
+        closeAllPanels();
+
+        if (!isOpen) {
+            dropdown.style.display = "block";
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+        }
+    });
+
+    marketCapOption.addEventListener("click", () => {
+        dropdown.style.display = "none";
+        marketCapPanel.style.display = "block";
+    });
+
+    colorOption.addEventListener("click", () => {
+        dropdown.style.display = "none";
+        marketCapPanel.style.display = "none";
+
+        colorPanel.style.display = "block";
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+        renderColorRules();
+    });
+
+    closeButton.addEventListener("click", () => {
+        closeAllPanels();
+    });
+
+    document.addEventListener("click", event => {
+        if (
+            !event.target.closest(".filter-menu-container")
+        ) {
+            closeAllPanels();
+        }
+    });
+
+    // -----------------------------------------------------
+    // CREATE RULE INPUT
+    // -----------------------------------------------------
+
+    function createColorRule(rule = {}) {
+
+        const ruleElement =
+            document.createElement("div");
+
+        ruleElement.className = "color-rule";
+
+        const lowerInput =
+            document.createElement("input");
+
+        lowerInput.type = "number";
+        lowerInput.min = "0";
+        lowerInput.max = "100";
+        lowerInput.step = "0.1";
+        lowerInput.placeholder = "From";
+        lowerInput.value = rule.lower ?? "";
+
+        lowerInput.setAttribute(
+            "aria-label",
+            "Lower percentage"
+        );
+
+        const upperInput =
+            document.createElement("input");
+
+        upperInput.type = "number";
+        upperInput.min = "0";
+        upperInput.max = "100";
+        upperInput.step = "0.1";
+        upperInput.placeholder = "To";
+        upperInput.value = rule.upper ?? "";
+
+        upperInput.setAttribute(
+            "aria-label",
+            "Upper percentage"
+        );
+
+        const colorInput =
+            document.createElement("input");
+
+        colorInput.type = "color";
+        colorInput.value = rule.color || "#facc15";
+
+        colorInput.setAttribute(
+            "aria-label",
+            "Range colour"
+        );
+
+        const removeButton =
+            document.createElement("button");
+
+        removeButton.type = "button";
+        removeButton.className = "remove-color-rule";
+        removeButton.textContent = "×";
+
+        removeButton.addEventListener("click", () => {
+
+    ruleElement.remove();
+
+    try {
+
+        // Save the remaining rules immediately.
+        const rules = collectRules();
+
+        saveColorRules(rules);
+
+        // Old assignments must not survive rule removal.
+        resetColorAssignments();
+
+        message.style.color = "#16803c";
+        message.textContent =
+            "Range removed. Remaining rules saved.";
+
+        renderCurrentRows();
+
+    } catch (error) {
+
+        message.style.color = "#dc2626";
+        message.textContent =
+            "Range removed from editor. Please correct the remaining ranges and save.";
+
+    }
+
+});
+
+        ruleElement.append(
+            lowerInput,
+            upperInput,
+            colorInput,
+            removeButton
+        );
+
+        rulesContainer.appendChild(ruleElement);
+    }
+
+    // -----------------------------------------------------
+    // RENDER SAVED RULES
+    // -----------------------------------------------------
+
+    function renderColorRules() {
+
+        rulesContainer.innerHTML = "";
+
+        const rules = getColorRules();
+
+        if (rules.length === 0) {
+            createColorRule();
+        } else {
+            rules.forEach(rule => {
+                createColorRule(rule);
+            });
+        }
+
+        message.textContent = "";
+    }
+
+    // -----------------------------------------------------
+    // ADD RULE
+    // -----------------------------------------------------
+
+    addButton.addEventListener("click", () => {
+        createColorRule();
+    });
+
+    // -----------------------------------------------------
+    // READ AND VALIDATE RULES
+    // -----------------------------------------------------
+
+    function collectRules() {
+
+        const rows =
+            [...rulesContainer.querySelectorAll(".color-rule")];
+
+        const rules = [];
+
+        for (const row of rows) {
+
+            const inputs =
+                row.querySelectorAll("input");
+
+            const lowerText = inputs[0].value.trim();
+            const upperText = inputs[1].value.trim();
+
+            const color = inputs[2].value;
+
+            if (
+                lowerText === "" ||
+                upperText === ""
+            ) {
+                throw new Error(
+                    "Please fill both lower and upper values."
+                );
+            }
+
+            // At most one decimal place.
+            if (
+                !/^\d{1,3}(?:\.\d)?$/.test(lowerText) ||
+                !/^\d{1,3}(?:\.\d)?$/.test(upperText)
+            ) {
+                throw new Error(
+                    "Use numbers with at most one decimal place."
+                );
+            }
+
+            const lower = Number(lowerText);
+            const upper = Number(upperText);
+
+            if (
+                lower < 0 ||
+                upper > 100 ||
+                lower >= upper
+            ) {
+                throw new Error(
+                    "Each range must be between 0 and 100, with the upper value greater than the lower value."
+                );
+            }
+
+            rules.push({
+                lower,
+                upper,
+                color
+            });
+        }
+
+        // Sort by lower boundary.
+        rules.sort((a, b) => a.lower - b.lower);
+
+        // Reject overlapping ranges.
+        for (let i = 1; i < rules.length; i++) {
+
+            if (
+                rules[i].lower < rules[i - 1].upper
+            ) {
+                throw new Error(
+                    "Ranges cannot overlap. Adjacent ranges are allowed."
+                );
+            }
+        }
+
+        return rules;
+    }
+
+    // -----------------------------------------------------
+    // SAVE RULES
+    // -----------------------------------------------------
+
+    saveButton.addEventListener("click", () => {
+
+        try {
+
+            const rules = collectRules();
+
+            saveColorRules(rules);
+
+            // New configuration → fresh assignments.
+            resetColorAssignments();
+
+            message.style.color = "#16803c";
+
+            message.textContent =
+                "Rules saved. Colour assignments have been reset.";
+
+            renderCurrentRows();
+
+        } catch (error) {
+
+            message.style.color = "#dc2626";
+            message.textContent = error.message;
+
+        }
+    });
+
+    // -----------------------------------------------------
+    // RESET COLOURS
+    // -----------------------------------------------------
+
+    resetButton.addEventListener("click", () => {
+
+        const confirmed = window.confirm(
+            "Reset all stock colour assignments for today? Saved rules will remain unchanged."
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        resetColorAssignments();
+
+        message.style.color = "#16803c";
+
+        message.textContent =
+            "Colour assignments reset. Stocks will receive new colours when they next match a rule.";
+
+        renderCurrentRows();
+    });
+}
+
 
 // =========================================================
 // SELECTION / VISITED STATE
@@ -510,26 +915,22 @@ export function render(
     view
 ) {
 
-    // Save the state of the tab we are
-    // leaving BEFORE changing currentView
-
+    // Save the state of the tab we are leaving.
     saveCurrentTabState();
 
+    currentCompanies = companies;
 
-    currentCompanies =
-        companies;
+    currentView = view;
 
-    currentView =
-        view;
-
+    // Assign colours only when new market data
+    // is received, not on every table redraw.
+    currentCompanies.forEach(company => {
+        updateCustomColorAssignment(company);
+    });
 
     // Load the independent state belonging
-    // to the new tab
-
-    activateTabState(
-        currentView
-    );
-
+    // to the new tab.
+    activateTabState(currentView);
 
     renderCurrentRows();
 }
@@ -683,14 +1084,6 @@ function renderCurrentRows() {
 
     }
 
-    currentCompanies.forEach(
-    company => {
-        updateDailyHighlight(
-            company
-        );
-    }
-);
-
     // =====================================================
     // NO DATA
     // =====================================================
@@ -733,7 +1126,8 @@ function renderCurrentRows() {
     // =====================================================
     // CREATE ROWS
     // =====================================================
-
+const assignments =
+    getColorAssignments().assignments;
     data.forEach(
         (company, index) => {
 
@@ -758,18 +1152,7 @@ function renderCurrentRows() {
                     symbol
                 );
 
-            const dailyHighlights =
-    getDailyHighlights();
 
-const isDailyGainer =
-    dailyHighlights.gainers.includes(
-        symbol
-    );
-
-const isDailyLoser =
-    dailyHighlights.losers.includes(
-        symbol
-    );
             // =================================================
             // CHANGE CLASS
             // =================================================
@@ -1300,43 +1683,32 @@ actions.appendChild(
             );
 
 
-            // =================================================
-            // CHANGE %
-            // =================================================
-
-            const changePercentCell =
+// =================================================
+// CHANGE %
+// =================================================
+const changePercentCell =
     createCell(
         changeClass,
         changePercent
     );
 
-if (
-    !isVisited
-) {
+// Apply locked custom colour.
+// Visited rows always retain their grey appearance.
 
-    if (
-        isDailyGainer
-    ) {
+if (!isVisited) {
+    const assignment = assignments[symbol];
 
-        changePercentCell.classList.add(
-            "daily-gainer-highlight"
-        );
-
-    } else if (
-        isDailyLoser
-    ) {
+    if (assignment) {
+        changePercentCell.style.backgroundColor =
+            assignment.color;
 
         changePercentCell.classList.add(
-            "daily-loser-highlight"
+            "custom-change-highlight"
         );
-
     }
-
 }
 
-row.appendChild(
-    changePercentCell
-);;
+row.appendChild(changePercentCell);
 
 
             // =================================================
@@ -1437,3 +1809,4 @@ function createCell(
 }
 
 initializeRankingControl();
+initializeColorRuleControls();

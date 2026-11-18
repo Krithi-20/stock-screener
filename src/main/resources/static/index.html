@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -252,38 +253,142 @@
 
 
         <!-- =================================================
-             MARKET CAP
+             FILTER MENU (MARKET CAP + CHANGE % COLOURS)
              ================================================= -->
 
-        <div class="market-cap-filter">
+        <div class="filter-menu-container">
 
-            <label for="marketCapSelect">
-                Market Cap
-            </label>
+            <button
+                type="button"
+                id="filterMenuButton"
+                class="filter-menu-button"
+                aria-label="Open filters"
+                aria-expanded="false"
+            >
+                <svg
+                    viewBox="0 0 24 24"
+                    width="19"
+                    height="19"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M4 7h16M7 12h10M10 17h4"/>
+                </svg>
+            </button>
 
-            <select id="marketCapSelect">
+            <div
+                id="filterDropdown"
+                class="filter-dropdown"
+                style="display: none;"
+            >
 
-                <option value="1000">
-                    ₹1,000 Cr+
-                </option>
+                <button
+                    type="button"
+                    class="filter-dropdown-item"
+                    id="marketCapFilterOption"
+                >
+                    Market Cap
+                </button>
 
-                <option value="2000">
-                    ₹2,000 Cr+
-                </option>
+                <button
+                    type="button"
+                    class="filter-dropdown-item"
+                    id="changeColorFilterOption"
+                >
+                    Change % Colours
+                </button>
 
-                <option value="3000">
-                    ₹3,000 Cr+
-                </option>
+            </div>
 
-                <option value="4000">
-                    ₹4,000 Cr+
-                </option>
+            <div
+                id="marketCapPanel"
+                class="filter-panel"
+                style="display: none;"
+            >
 
-                <option value="5000">
-                    ₹5,000 Cr+
-                </option>
+                <label for="marketCapSelect">
+                    Market Cap
+                </label>
 
-            </select>
+                <select id="marketCapSelect">
+
+                    <option value="1000">₹1,000 Cr+</option>
+                    <option value="2000">₹2,000 Cr+</option>
+                    <option value="3000">₹3,000 Cr+</option>
+                    <option value="4000">₹4,000 Cr+</option>
+                    <option value="5000">₹5,000 Cr+</option>
+
+                </select>
+
+            </div>
+
+            <div
+                id="changeColorPanel"
+                class="filter-panel change-color-panel"
+                style="display: none;"
+            >
+
+                <div class="filter-panel-header">
+
+                    <strong>Change % Colours</strong>
+
+                    <button
+                        type="button"
+                        id="closeColorPanel"
+                        class="filter-close-button"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <p class="filter-description">
+                    Assign colours to positive Change % ranges.
+                    Each stock keeps its first assigned colour for the day.
+                </p>
+
+                <div
+                    id="colorRulesContainer"
+                    class="color-rules-container"
+                ></div>
+
+                <button
+                    type="button"
+                    id="addColorRuleButton"
+                    class="add-color-rule-button"
+                >
+                    + Add Range
+                </button>
+
+                <div class="color-panel-actions">
+
+                    <button
+                        type="button"
+                        id="saveColorRulesButton"
+                        class="save-color-rules-button"
+                    >
+                        Save Rules
+                    </button>
+
+                    <button
+                        type="button"
+                        id="resetColorRulesButton"
+                        class="reset-color-rules-button"
+                    >
+                        Reset Colours
+                    </button>
+
+                </div>
+
+                <p
+                    id="colorRulesMessage"
+                    class="color-rules-message"
+                ></p>
+
+            </div>
 
         </div>
 
@@ -465,4 +570,3 @@
 </body>
 
 </html>
-
