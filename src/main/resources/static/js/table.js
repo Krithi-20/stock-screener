@@ -535,25 +535,33 @@ function initializeColorRuleControls() {
     // RESET COLOURS
     // -----------------------------------------------------
 
-    resetButton.addEventListener("click", () => {
+resetButton.addEventListener("click", () => {
 
-        const confirmed = window.confirm(
-            "Reset all stock colour assignments for today? Saved rules will remain unchanged."
-        );
+    const confirmed = window.confirm(
+        "Reset all color rules and stock color assignments for today? This cannot be undone."
+    );
 
-        if (!confirmed) {
-            return;
-        }
+    if (!confirmed) {
+        return;
+    }
 
-        resetColorAssignments();
+    // Clear all saved color range rules.
+    saveColorRules([]);
 
-        message.style.color = "#16803c";
+    // Clear today's stock color assignments.
+    resetColorAssignments();
 
-        message.textContent =
-            "Colour assignments reset. Stocks will receive new colours when they next match a rule.";
+    // Refresh the color rules editor.
+    renderColorRules();
 
-        renderCurrentRows();
-    });
+    message.style.color = "#16803c";
+
+    message.textContent =
+        "All color rules and today's stock color assignments have been cleared.";
+
+    // Immediately remove color highlights from the table.
+    renderCurrentRows();
+});
 }
 
 
