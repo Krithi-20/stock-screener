@@ -302,28 +302,53 @@
                 </button>
 
             </div>
-
             <div
-                id="marketCapPanel"
-                class="filter-panel"
-                style="display: none;"
-            >
+    id="marketCapPanel"
+    class="filter-panel"
+    style="display: none;"
+>
 
-                <label for="marketCapSelect">
-                    Market Cap
-                </label>
+    <label>Market Cap Range (₹ Cr)</label>
 
-                <select id="marketCapSelect">
+    <div class="market-cap-inputs">
 
-                    <option value="1000">₹1,000 Cr+</option>
-                    <option value="2000">₹2,000 Cr+</option>
-                    <option value="3000">₹3,000 Cr+</option>
-                    <option value="4000">₹4,000 Cr+</option>
-                    <option value="5000">₹5,000 Cr+</option>
+        <input
+            type="number"
+            id="marketCapMin"
+            placeholder="Min (₹ Cr)"
+            min="0"
+            step="any"
+        >
 
-                </select>
+        <input
+            type="number"
+            id="marketCapMax"
+            placeholder="Max (₹ Cr)"
+            min="0"
+            step="any"
+        >
 
-            </div>
+    </div>
+
+    <div class="market-cap-actions">
+
+        <button
+            type="button"
+            id="applyMarketCapFilter"
+        >
+            Apply
+        </button>
+
+        <button
+            type="button"
+            id="clearMarketCapFilter"
+        >
+            Clear
+        </button>
+
+    </div>
+
+</div>
 
             <div
                 id="changeColorPanel"

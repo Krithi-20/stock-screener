@@ -401,13 +401,6 @@ function showLosers() {
 // EVENT LISTENERS
 // =========================================================
 
-document
-    .getElementById("marketCapSelect")
-    .addEventListener(
-        "change",
-        changeMarketCap
-    );
-
 
 document
     .getElementById("allTab")

@@ -233,6 +233,18 @@ function initializeColorRuleControls() {
     const marketCapPanel =
         document.getElementById("marketCapPanel");
 
+    const marketCapMinInput =
+    document.getElementById("marketCapMin");
+
+const marketCapMaxInput =
+    document.getElementById("marketCapMax");
+
+const applyMarketCapButton =
+    document.getElementById("applyMarketCapFilter");
+
+const clearMarketCapButton =
+    document.getElementById("clearMarketCapFilter");
+
     const colorPanel =
         document.getElementById("changeColorPanel");
 
@@ -299,6 +311,68 @@ function initializeColorRuleControls() {
         dropdown.style.display = "none";
         marketCapPanel.style.display = "block";
     });
+
+    // -----------------------------------------------------
+// MARKET CAP RANGE FILTER
+// -----------------------------------------------------
+
+applyMarketCapButton.addEventListener("click", () => {
+
+    const minText =
+        marketCapMinInput.value.trim();
+
+    const maxText =
+        marketCapMaxInput.value.trim();
+
+    if (
+        minText === "" ||
+        maxText === ""
+    ) {
+        alert("Please enter both minimum and maximum market cap values.");
+        return;
+    }
+
+    const min =
+        Number(minText);
+
+    const max =
+        Number(maxText);
+
+    if (
+        !Number.isFinite(min) ||
+        !Number.isFinite(max) ||
+        min < 0 ||
+        max < min
+    ) {
+        alert("Enter a valid Market Cap range.");
+        return;
+    }
+
+    marketCapFilter = {
+        min,
+        max
+    };
+
+    renderCurrentRows();
+
+    marketCapPanel.style.display = "none";
+    dropdown.style.display = "none";
+
+});
+
+clearMarketCapButton.addEventListener("click", () => {
+
+    marketCapMinInput.value = "";
+    marketCapMaxInput.value = "";
+
+    marketCapFilter = null;
+
+    renderCurrentRows();
+
+    marketCapPanel.style.display = "none";
+    dropdown.style.display = "none";
+
+});
 
     colorOption.addEventListener("click", () => {
         dropdown.style.display = "none";
@@ -641,6 +715,9 @@ let lastClickedIndex = null;
 let currentCompanies = [];
 
 let currentView = "all";
+
+
+let marketCapFilter = null;
 
 // =========================================================
 // GLOBAL RANKING FREEZE STATE
@@ -1114,6 +1191,27 @@ function renderCurrentRows() {
         currentCompanies,
         currentView
     );
+
+    // =====================================================
+// MARKET CAP RANGE FILTER
+// =====================================================
+
+if (marketCapFilter) {
+
+    data = data.filter(company => {
+
+        const marketCap =
+            Number(company.marketCap);
+
+        return (
+            Number.isFinite(marketCap) &&
+            marketCap >= marketCapFilter.min &&
+            marketCap <= marketCapFilter.max
+        );
+
+    });
+
+}
 
     // When frozen, retain the captured ranking order.
     if (rankingFrozen) {
