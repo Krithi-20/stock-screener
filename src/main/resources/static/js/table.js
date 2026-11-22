@@ -130,21 +130,18 @@ function updateCustomColorAssignment(company) {
     const symbol =
         company.nseSymbol;
 
-    if (
-        !symbol ||
-        !Number.isFinite(changePercent) ||
-        changePercent <= 0
-    ) {
-        return;
-    }
+if (
+    !symbol ||
+    !Number.isFinite(changePercent)
+) {
+    return;
+}
 
     const stored =
         getColorAssignments();
 
-    // Already assigned today → NEVER change it.
-    if (stored.assignments[symbol]) {
-        return;
-    }
+    const existingAssignment =
+        stored.assignments[symbol];
 
     const rules =
         getColorRules();
@@ -155,6 +152,37 @@ function updateCustomColorAssignment(company) {
             changePercent < rule.upper
         );
 
+    // =============================================
+    // STOCK ALREADY ASSIGNED TODAY
+    // Check whether it has moved to a different range.
+    // =============================================
+
+    if (existingAssignment) {
+
+        // Notification already triggered today.
+        // Keep it permanently until Reset Colors.
+        if (existingAssignment.rangeChanged) {
+            return;
+        }
+
+        const rangeChanged =
+            !matchingRule ||
+            matchingRule.lower !== existingAssignment.lower ||
+            matchingRule.upper !== existingAssignment.upper;
+
+        if (rangeChanged) {
+            existingAssignment.rangeChanged = true;
+
+            saveColorAssignments(stored);
+        }
+
+        return;
+    }
+
+    // =============================================
+    // FIRST-TIME COLOUR ASSIGNMENT
+    // =============================================
+
     if (!matchingRule) {
         return;
     }
@@ -162,11 +190,14 @@ function updateCustomColorAssignment(company) {
     stored.assignments[symbol] = {
         color: matchingRule.color,
         lower: matchingRule.lower,
-        upper: matchingRule.upper
+        upper: matchingRule.upper,
+        rangeChanged: false
     };
 
     saveColorAssignments(stored);
 }
+
+
 
 // ---------------------------------------------------------
 // RESET DAILY COLOUR ASSIGNMENTS
@@ -310,7 +341,7 @@ function initializeColorRuleControls() {
             document.createElement("input");
 
         lowerInput.type = "number";
-        lowerInput.min = "0";
+        lowerInput.min = "-100";
         lowerInput.max = "100";
         lowerInput.step = "0.1";
         lowerInput.placeholder = "From";
@@ -325,7 +356,7 @@ function initializeColorRuleControls() {
             document.createElement("input");
 
         upperInput.type = "number";
-        upperInput.min = "0";
+        upperInput.min = "-100";
         upperInput.max = "100";
         upperInput.step = "0.1";
         upperInput.placeholder = "To";
@@ -455,8 +486,8 @@ function initializeColorRuleControls() {
 
             // At most one decimal place.
             if (
-                !/^\d{1,3}(?:\.\d)?$/.test(lowerText) ||
-                !/^\d{1,3}(?:\.\d)?$/.test(upperText)
+                !/^-?\d{1,3}(?:\.\d)?$/.test(lowerText) ||
+                !/^-?\d{1,3}(?:\.\d)?$/.test(upperText)
             ) {
                 throw new Error(
                     "Use numbers with at most one decimal place."
@@ -467,7 +498,9 @@ function initializeColorRuleControls() {
             const upper = Number(upperText);
 
             if (
-                lower < 0 ||
+                lower < -100 ||
+                upper > 100 ||
+                upper < -100 ||
                 upper > 100 ||
                 lower >= upper
             ) {
@@ -1426,18 +1459,25 @@ const assignments =
             // SYMBOL TEXT
             // =================================================
 
-            const symbolText =
-                document.createElement(
-                    "span"
-                );
+const symbolText =
+    document.createElement(
+        "span"
+    );
 
+symbolText.className =
+    "symbol-text";
 
-            symbolText.className =
-                "symbol-text";
+symbolText.textContent =
+    symbol;
 
-
-            symbolText.textContent =
-                symbol;
+// Live colour indicator based on the CURRENT range.
+// Green notification when stock moves out
+// of its originally assigned change % range.
+if (assignments[symbol]?.rangeChanged) {
+    symbolText.style.backgroundColor = "#22c55e";
+    symbolText.style.borderRadius = "3px";
+    symbolText.style.padding = "2px 4px";
+}
 
 
             symbolContainer.appendChild(
